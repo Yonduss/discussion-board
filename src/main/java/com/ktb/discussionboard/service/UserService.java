@@ -6,7 +6,8 @@ import com.ktb.discussionboard.dto.UpdateUserProfileRequestDto;
 import com.ktb.discussionboard.dto.UserResponseDto;
 import com.ktb.discussionboard.exception.BusinessException;
 import com.ktb.discussionboard.exception.ErrorCode;
-import com.ktb.discussionboard.repository.UserMemoryRepository;
+import com.ktb.discussionboard.repository.UserRepository;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -14,22 +15,24 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserService {
 
-    private final UserMemoryRepository userMemoryRepository;
+    private final UserRepository userRepository;
 
+    @Transactional(readOnly = true)
     public UserResponseDto getUser(Long userId) {
-        User user = userMemoryRepository.findById(userId)
+        User user = userRepository.findByIdAndDeletedFalse(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         return toUserResponseDto(user);
     }
 
+    @Transactional
     public UserResponseDto updateUserProfile(Long userId, UpdateUserProfileRequestDto request) {
-        User user = userMemoryRepository.findById(userId)
+        User user = userRepository.findByIdAndDeletedFalse(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         if (request.getNickname() != null) {
             if (!request.getNickname().equals(user.getNickname())
-                    && userMemoryRepository.existsByNickname(request.getNickname())) {
+                    && userRepository.existsByNicknameAndDeletedFalse(request.getNickname())) {
                 throw new BusinessException(ErrorCode.NICKNAME_EXISTS);
             }
 
@@ -43,8 +46,9 @@ public class UserService {
         return toUserResponseDto(user);
     }
 
+    @Transactional
     public void changePassword(Long userId, ChangePasswordRequestDto request) {
-        User user = userMemoryRepository.findById(userId)
+        User user = userRepository.findByIdAndDeletedFalse(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         if (!user.getPassword().equals(request.getCurrentPassword())) {
@@ -62,13 +66,14 @@ public class UserService {
         user.setPassword(request.getNewPassword());
     }
 
+    @Transactional
     public void deleteUser(Long userId) {
-        User user = userMemoryRepository.findById(userId)
+        User user = userRepository.findByIdAndDeletedFalse(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
+        user.setDeleted(true);
         user.setNickname("Unknown user");
         user.setProfileImageUrl(null);
-        userMemoryRepository.delete(user);
     }
 
     private UserResponseDto toUserResponseDto(User user) {

@@ -4,7 +4,7 @@ import com.ktb.discussionboard.domain.User;
 import com.ktb.discussionboard.dto.*;
 import com.ktb.discussionboard.exception.BusinessException;
 import com.ktb.discussionboard.exception.ErrorCode;
-import com.ktb.discussionboard.repository.UserMemoryRepository;
+import com.ktb.discussionboard.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,14 +12,14 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AuthService {
 
-    private final UserMemoryRepository userRepository;
+    private final UserRepository userRepository;
 
     public SignUpResponseDto signUp(SignUpRequestDto request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new BusinessException(ErrorCode.EMAIL_EXISTS);
         }
 
-        if (userRepository.existsByNickname(request.getNickname())) {
+        if (userRepository.existsByNicknameAndDeletedFalse(request.getNickname())) {
             throw new BusinessException(ErrorCode.NICKNAME_EXISTS);
         }
 

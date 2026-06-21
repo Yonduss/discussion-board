@@ -7,11 +7,12 @@ import com.ktb.discussionboard.dto.CreateCommentRequestDto;
 import com.ktb.discussionboard.dto.UpdateCommentRequestDto;
 import com.ktb.discussionboard.exception.BusinessException;
 import com.ktb.discussionboard.exception.ErrorCode;
-import com.ktb.discussionboard.repository.CommentMemoryRepository;
-import com.ktb.discussionboard.repository.PostMemoryRepository;
-import com.ktb.discussionboard.repository.UserMemoryRepository;
+import com.ktb.discussionboard.repository.CommentRepository;
+import com.ktb.discussionboard.repository.PostRepository;
+import com.ktb.discussionboard.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,22 +21,23 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CommentService {
 
-    private final CommentMemoryRepository commentMemoryRepository;
-    private final UserMemoryRepository userMemoryRepository;
-    private final PostMemoryRepository postMemoryRepository;
+    private final CommentRepository commentRepository;
+    private final UserRepository userRepository;
+    private final PostRepository postRepository;
 
+    @Transactional
     public CommentResponseDto createComment(
             Long userId,
             Long postId,
             CreateCommentRequestDto request) {
-        userMemoryRepository.findById(userId)
+        userRepository.findByIdAndDeletedFalse(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-        postMemoryRepository.findById(postId)
+        postRepository.findByIdAndDeletedFalseAndHiddenFalse(postId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
 
         if (request.getParentCommentId() != null) {
-            Comment parentComment = commentMemoryRepository.findById(request.getParentCommentId())
+            Comment parentComment = commentRepository.findByIdAndDeletedFalse(request.getParentCommentId())
                     .orElseThrow(() -> new BusinessException(ErrorCode.COMMENT_NOT_FOUND));
 
             if (!parentComment.getPostId().equals(postId)) {
@@ -55,23 +57,25 @@ public class CommentService {
                 LocalDateTime.now()
         );
 
-        Comment savedComment = commentMemoryRepository.save(comment);
+        Comment savedComment = commentRepository.save(comment);
 
         return toCommentResponseDto(savedComment);
     }
 
+    @Transactional(readOnly = true)
     public CommentResponseDto getComment(Long commentId) {
-        Comment comment = commentMemoryRepository.findById(commentId)
+        Comment comment = commentRepository.findByIdAndDeletedFalse(commentId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.COMMENT_NOT_FOUND));
 
         return toCommentResponseDto(comment);
     }
 
+    @Transactional(readOnly = true)
     public CommentListResponseDto getComments(Long postId) {
-        postMemoryRepository.findById(postId)
+        postRepository.findByIdAndDeletedFalseAndHiddenFalse(postId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
 
-        List<CommentResponseDto> comments = commentMemoryRepository.findAllByPostId(postId)
+        List<CommentResponseDto> comments = commentRepository.findAllByPostIdOrderByCreatedAtAsc(postId)
                 .stream()
                 .map(this::toCommentResponseDto)
                 .toList();
@@ -79,11 +83,12 @@ public class CommentService {
         return new CommentListResponseDto(comments);
     }
 
+    @Transactional
     public CommentResponseDto updateComment(
             Long userId,
             Long commentId,
             UpdateCommentRequestDto request) {
-        Comment comment = commentMemoryRepository.findById(commentId)
+        Comment comment = commentRepository.findByIdAndDeletedFalse(commentId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.COMMENT_NOT_FOUND));
 
         if (!comment.getUserId().equals(userId)) {
@@ -97,8 +102,9 @@ public class CommentService {
         return toCommentResponseDto(comment);
     }
 
+    @Transactional
     public void deleteComment(Long userId, Long commentId) {
-        Comment comment = commentMemoryRepository.findById(commentId)
+        Comment comment = commentRepository.findByIdAndDeletedFalse(commentId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.COMMENT_NOT_FOUND));
 
         if (!comment.getUserId().equals(userId)) {
@@ -106,7 +112,7 @@ public class CommentService {
         }
 
         comment.setContent("Deleted comment.");
-        commentMemoryRepository.delete(comment);
+        comment.setDeleted(true);
     }
 
     private CommentResponseDto toCommentResponseDto(Comment comment) {

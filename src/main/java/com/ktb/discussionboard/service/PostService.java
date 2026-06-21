@@ -6,8 +6,9 @@ import com.ktb.discussionboard.dto.PostResponseDto;
 import com.ktb.discussionboard.dto.UpdatePostRequestDto;
 import com.ktb.discussionboard.exception.BusinessException;
 import com.ktb.discussionboard.exception.ErrorCode;
-import com.ktb.discussionboard.repository.PostMemoryRepository;
-import com.ktb.discussionboard.repository.UserMemoryRepository;
+import com.ktb.discussionboard.repository.PostRepository;
+import com.ktb.discussionboard.repository.UserRepository;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,11 +19,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PostService {
     
-    private final PostMemoryRepository postMemoryRepository;
-    private final UserMemoryRepository userMemoryRepository;
+    private final PostRepository postRepository;
+    private final UserRepository userRepository;
 
+    @Transactional
     public PostResponseDto createPost(Long userId, CreatePostRequestDto request) {
-        userMemoryRepository.findById(userId)
+        userRepository.findByIdAndDeletedFalse(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         Post post = new Post(
@@ -41,13 +43,14 @@ public class PostService {
                 LocalDateTime.now()
         );
 
-        Post savedPost = postMemoryRepository.save(post);
+        Post savedPost = postRepository.save(post);
 
         return toPostResponseDto(savedPost);
     }
 
+    @Transactional(readOnly = true)
     public PostResponseDto getPost(Long postId) {
-        Post post = postMemoryRepository.findById(postId)
+        Post post = postRepository.findByIdAndDeletedFalseAndHiddenFalse(postId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
 
         post.setViewCount(post.getViewCount() + 1);
@@ -55,14 +58,16 @@ public class PostService {
         return toPostResponseDto(post);
     }
 
+    @Transactional(readOnly = true)
     public List<PostResponseDto> getPosts() {
-        return postMemoryRepository.findAll().stream()
+        return postRepository.findAllByDeletedFalseAndHiddenFalseOrderByCreatedAtDesc().stream()
                 .map(this::toPostResponseDto)
                 .toList();
     }
 
+    @Transactional
     public PostResponseDto updatePost(Long userId, Long postId, UpdatePostRequestDto request) {
-        Post post = postMemoryRepository.findById(postId)
+        Post post = postRepository.findByIdAndDeletedFalseAndHiddenFalse(postId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
 
         if (!post.getUserId().equals(userId)) {
@@ -87,32 +92,35 @@ public class PostService {
         return toPostResponseDto(post);
     }
 
+    @Transactional
     public void deletePost(Long userId, Long postId) {
-        Post post = postMemoryRepository.findById(postId)
+        Post post = postRepository.findByIdAndDeletedFalseAndHiddenFalse(postId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
 
         if (!post.getUserId().equals(userId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN);
         }
 
-        postMemoryRepository.delete(post);
+        post.setDeleted(true);
     }
 
+    @Transactional
     public void likePost(Long userId, Long postId) {
-        userMemoryRepository.findById(userId)
+        userRepository.findByIdAndDeletedFalse(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-        Post post = postMemoryRepository.findById(postId)
+        Post post = postRepository.findByIdAndDeletedFalseAndHiddenFalse(postId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
 
         post.setLikeCount(post.getLikeCount() + 1);
     }
 
+    @Transactional
     public void reportPost(Long userId, Long postId) {
-        userMemoryRepository.findById(userId)
+        userRepository.findByIdAndDeletedFalse(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-        Post post = postMemoryRepository.findById(postId)
+        Post post = postRepository.findByIdAndDeletedFalseAndHiddenFalse(postId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
 
         if (post.getUserId().equals(userId)) {
