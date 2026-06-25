@@ -54,7 +54,8 @@ public class CommentService {
                 false,
                 false,
                 LocalDateTime.now(),
-                LocalDateTime.now()
+                LocalDateTime.now(),
+                null
         );
 
         Comment savedComment = commentRepository.save(comment);
@@ -113,6 +114,7 @@ public class CommentService {
 
         comment.setContent("Deleted comment.");
         comment.setDeleted(true);
+        comment.setDeletedAt(LocalDateTime.now());
     }
 
     private CommentResponseDto toCommentResponseDto(Comment comment) {

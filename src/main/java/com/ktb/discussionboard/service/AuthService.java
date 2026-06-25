@@ -8,6 +8,8 @@ import com.ktb.discussionboard.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -33,7 +35,11 @@ public class AuthService {
                 request.getPassword(),
                 request.getNickname(),
                 request.getProfileImageUrl(),
-                false
+                false,
+                LocalDateTime.now(),
+                LocalDateTime.now(),
+                LocalDateTime.now(),
+                null
         );
 
         User savedUser = userRepository.save(user);

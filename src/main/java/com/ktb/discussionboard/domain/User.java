@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -33,9 +35,15 @@ public class User {
     @Column(nullable = false)
     private boolean deleted;
 
-    //private LocalDateTime signedUpAt;
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
 
-    //private LocalDateTime updatedAt;
+    @Column(name = "profile_updated_at", nullable = false)
+    private LocalDateTime profileUpdatedAt;
 
-    //private LocalDateTime deletedAt;
+    @Column(name = "password_updated_at", nullable = false)
+    private LocalDateTime passwordUpdatedAt;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 }

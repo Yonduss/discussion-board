@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @AllArgsConstructor
@@ -12,7 +13,7 @@ public class PostResponseDto {
     private Long userId;
     private String title;
     private String content;
-    private String postImageUrl;
+    private List<String> postImageUrls;
     private int likeCount;
     private int viewCount;
     private boolean edited;

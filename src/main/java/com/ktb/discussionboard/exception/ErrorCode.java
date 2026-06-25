@@ -11,6 +11,10 @@ public enum ErrorCode {
 
     NICKNAME_EXISTS("Nickname is already existed", HttpStatus.CONFLICT),
 
+    POST_ALREADY_LIKED("Post is already liked", HttpStatus.CONFLICT),
+
+    POST_ALREADY_REPORTED("Post is already reported", HttpStatus.CONFLICT),
+
     PASSWORD_MISMATCH("Passwords do not match", HttpStatus.BAD_REQUEST),
 
     CURRENT_PASSWORD_MISMATCH("Current password does not match", HttpStatus.BAD_REQUEST),

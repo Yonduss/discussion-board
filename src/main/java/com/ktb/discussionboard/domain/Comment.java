@@ -29,7 +29,7 @@ public class Comment {
     @Column(name = "parent_comment_id")
     private Long parentCommentId;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false)
     private String content;
 
     @Column(nullable = false)
@@ -44,5 +44,6 @@ public class Comment {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    //private LocalDateTime deletedAt;
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 }

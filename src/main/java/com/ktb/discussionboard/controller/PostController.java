@@ -2,6 +2,7 @@ package com.ktb.discussionboard.controller;
 
 import com.ktb.discussionboard.dto.CreatePostRequestDto;
 import com.ktb.discussionboard.dto.PostResponseDto;
+import com.ktb.discussionboard.dto.ReportPostRequestDto;
 import com.ktb.discussionboard.dto.UpdatePostRequestDto;
 import com.ktb.discussionboard.response.ApiResponse;
 import com.ktb.discussionboard.service.PostService;
@@ -77,9 +78,10 @@ public class PostController {
     @PostMapping("/{userId}/{postId}/reports")
     public ResponseEntity<ApiResponse<Void>> reportPost(
             @PathVariable Long userId,
-            @PathVariable Long postId) {
+            @PathVariable Long postId,
+            @Valid @RequestBody ReportPostRequestDto request) {
 
-        postService.reportPost(userId, postId);
+        postService.reportPost(userId, postId, request.getReason());
 
         return ResponseEntity.ok(
                 ApiResponse.of("Post reported successfully", null));

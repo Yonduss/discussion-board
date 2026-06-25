@@ -4,14 +4,22 @@ INSERT INTO users (
     password,
     nickname,
     profile_image_url,
-    deleted
+    deleted,
+    created_at,
+    profile_updated_at,
+    password_updated_at,
+    deleted_at
 ) VALUES (
     1,
     'denzi@chainsawman.com',
     'strongman1',
     'Pochita',
     NULL,
-    false
+    false,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP,
+    NULL
 );
 
 INSERT INTO users (
@@ -20,14 +28,22 @@ INSERT INTO users (
     password,
     nickname,
     profile_image_url,
-    deleted
+    deleted,
+    created_at,
+    profile_updated_at,
+    password_updated_at,
+    deleted_at
 ) VALUES (
      2,
      'reze@janedoe.com',
      '161616',
      'Bomb',
      NULL,
-     false
+     false,
+     CURRENT_TIMESTAMP,
+     CURRENT_TIMESTAMP,
+     CURRENT_TIMESTAMP,
+     NULL
 );
 
 INSERT INTO posts (
@@ -35,7 +51,6 @@ INSERT INTO posts (
     user_id,
     title,
     content,
-    post_image_url,
     like_count,
     view_count,
     reported_count,
@@ -43,13 +58,14 @@ INSERT INTO posts (
     edited,
     hidden,
     created_at,
-    updated_at
+    updated_at,
+    deleted_at,
+    hidden_at
 ) VALUES (
     1,
     1,
     'I''m chainsaw man',
     'Do you know where the Futamichi Cafe is?',
-    NULL,
     0,
     0,
     0,
@@ -57,7 +73,21 @@ INSERT INTO posts (
     false,
     false,
     CURRENT_TIMESTAMP,
-    CURRENT_TIMESTAMP
+    CURRENT_TIMESTAMP,
+    NULL,
+    NULL
+);
+
+INSERT INTO post_images (
+    id,
+    post_id,
+    image_url,
+    sort_order
+) VALUES (
+    1,
+    1,
+    'https://pixabay.com/ko/photos/hard-rock-cafe-%EC%8B%9D%EB%8B%B9-3726209/',
+    0
 );
 
 INSERT INTO comments (
@@ -69,7 +99,8 @@ INSERT INTO comments (
     deleted,
     edited,
     created_at,
-    updated_at
+    updated_at,
+    deleted_at
 ) VALUES (
     1,
     1,
@@ -79,7 +110,8 @@ INSERT INTO comments (
     false,
     false,
     CURRENT_TIMESTAMP,
-    CURRENT_TIMESTAMP
+    CURRENT_TIMESTAMP,
+    NULL
 );
 
 INSERT INTO comments (
@@ -91,7 +123,8 @@ INSERT INTO comments (
     deleted,
     edited,
     created_at,
-    updated_at
+    updated_at,
+    deleted_at
 ) VALUES (
     2,
     1,
@@ -101,5 +134,6 @@ INSERT INTO comments (
     false,
     false,
     CURRENT_TIMESTAMP,
-    CURRENT_TIMESTAMP
+    CURRENT_TIMESTAMP,
+    NULL
 );

@@ -1,13 +1,15 @@
 package com.ktb.discussionboard.service;
 
 import com.ktb.discussionboard.domain.Post;
+import com.ktb.discussionboard.domain.PostImage;
+import com.ktb.discussionboard.domain.PostLike;
+import com.ktb.discussionboard.domain.PostReport;
 import com.ktb.discussionboard.dto.CreatePostRequestDto;
 import com.ktb.discussionboard.dto.PostResponseDto;
 import com.ktb.discussionboard.dto.UpdatePostRequestDto;
 import com.ktb.discussionboard.exception.BusinessException;
 import com.ktb.discussionboard.exception.ErrorCode;
-import com.ktb.discussionboard.repository.PostRepository;
-import com.ktb.discussionboard.repository.UserRepository;
+import com.ktb.discussionboard.repository.*;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,9 @@ public class PostService {
     
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final PostLikeRepository postLikeRepository;
+    private final PostReportRepository postReportRepository;
+    private final PostImageRepository postImageRepository;
 
     @Transactional
     public PostResponseDto createPost(Long userId, CreatePostRequestDto request) {
@@ -32,7 +37,6 @@ public class PostService {
                 userId,
                 request.getTitle(),
                 request.getContent(),
-                request.getPostImageUrl(),
                 0,
                 0,
                 0,
@@ -40,10 +44,24 @@ public class PostService {
                 false,
                 false,
                 LocalDateTime.now(),
-                LocalDateTime.now()
+                LocalDateTime.now(),
+                null,
+                null
         );
 
         Post savedPost = postRepository.save(post);
+
+        if (request.getPostImageUrls() != null) {
+            for (int i = 0; i < request.getPostImageUrls().size(); i++) {
+                PostImage postImage = new PostImage(
+                        null,
+                        savedPost.getId(),
+                        request.getPostImageUrls().get(i),
+                        i
+                );
+                postImageRepository.save(postImage);
+            }
+        }
 
         return toPostResponseDto(savedPost);
     }
@@ -82,8 +100,19 @@ public class PostService {
             post.setContent(request.getContent());
         }
 
-        if (request.getPostImageUrl() != null) {
-            post.setPostImageUrl(request.getPostImageUrl());
+        if (request.getPostImageUrls() != null) {
+            postImageRepository.deleteAllByPostId(postId);
+
+            for (int i = 0; i < request.getPostImageUrls().size(); i++) {
+                PostImage postImage = new PostImage(
+                        null,
+                        postId,
+                        request.getPostImageUrls().get(i),
+                        i
+                );
+
+                postImageRepository.save(postImage);
+            }
         }
 
         post.setEdited(true);
@@ -102,6 +131,7 @@ public class PostService {
         }
 
         post.setDeleted(true);
+        post.setDeletedAt(LocalDateTime.now());
     }
 
     @Transactional
@@ -112,35 +142,65 @@ public class PostService {
         Post post = postRepository.findByIdAndDeletedFalseAndHiddenFalse(postId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
 
+        if (postLikeRepository.existsByUserIdAndPostId(userId, postId)) {
+            throw new BusinessException(ErrorCode.POST_ALREADY_LIKED);
+        }
+
+        PostLike postLike = new PostLike(
+                null,
+                userId,
+                postId,
+                LocalDateTime.now()
+        );
+
+        postLikeRepository.save(postLike);
+
         post.setLikeCount(post.getLikeCount() + 1);
     }
 
     @Transactional
-    public void reportPost(Long userId, Long postId) {
+    public void reportPost(Long userId, Long postId, String reason) {
         userRepository.findByIdAndDeletedFalse(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         Post post = postRepository.findByIdAndDeletedFalseAndHiddenFalse(postId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
 
-        if (post.getUserId().equals(userId)) {
-            throw new BusinessException(ErrorCode.FORBIDDEN);
+        if (postReportRepository.existsByUserIdAndPostId(userId, postId)) {
+            throw new BusinessException(ErrorCode.POST_ALREADY_REPORTED);
         }
+
+        PostReport postReport = new PostReport(
+                null,
+                userId,
+                postId,
+                reason,
+                LocalDateTime.now()
+        );
+
+        postReportRepository.save(postReport);
 
         post.setReportedCount(post.getReportedCount() + 1);
 
         if (post.getReportedCount() >= 5) {
             post.setHidden(true);
+            post.setHiddenAt(LocalDateTime.now());
         }
     }
 
     private PostResponseDto toPostResponseDto(Post post) {
+        List<String> postImageUrls = postImageRepository
+                .findAllByPostIdOrderBySortOrderAsc(post.getId())
+                .stream()
+                .map(PostImage::getImageUrl)
+                .toList();
+
         return new PostResponseDto(
                 post.getId(),
                 post.getUserId(),
                 post.getTitle(),
                 post.getContent(),
-                post.getPostImageUrl(),
+                postImageUrls,
                 post.getLikeCount(),
                 post.getViewCount(),
                 post.isEdited(),

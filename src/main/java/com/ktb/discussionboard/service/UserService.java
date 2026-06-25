@@ -11,6 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -37,10 +39,12 @@ public class UserService {
             }
 
             user.setNickname(request.getNickname());
+            user.setProfileUpdatedAt(LocalDateTime.now());
         }
 
         if (request.getProfileImageUrl() != null) {
             user.setProfileImageUrl(request.getProfileImageUrl());
+            user.setProfileUpdatedAt(LocalDateTime.now());
         }
 
         return toUserResponseDto(user);
@@ -64,6 +68,7 @@ public class UserService {
         }
 
         user.setPassword(request.getNewPassword());
+        user.setPasswordUpdatedAt(LocalDateTime.now());
     }
 
     @Transactional
@@ -74,6 +79,7 @@ public class UserService {
         user.setDeleted(true);
         user.setNickname("Unknown user");
         user.setProfileImageUrl(null);
+        user.setDeletedAt(LocalDateTime.now());
     }
 
     private UserResponseDto toUserResponseDto(User user) {

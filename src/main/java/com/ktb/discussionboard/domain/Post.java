@@ -29,9 +29,6 @@ public class Post {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @Column(name = "post_image_url")
-    private String postImageUrl;
-
     @Column(name = "like_count", nullable = false)
     private int likeCount;
 
@@ -56,7 +53,9 @@ public class Post {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    //private LocalDateTime deletedAt;
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 
-    //private LocalDateTime blindedAt;
+    @Column(name = "hidden_at")
+    private LocalDateTime hiddenAt;
 }
