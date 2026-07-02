@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Post detail</title>
+    <link rel="stylesheet" href="/discussionboard/frontend/css/common.css">
     <link rel="stylesheet" href="/discussionboard/frontend/css/post.css">
     <link rel="stylesheet" href="/discussionboard/frontend/css/post-detail.css">
-    <link rel="stylesheet" href="/discussionboard/frontend/css/common.css">
 </head>
 <body>
     <div class="ktb-top-banner">
@@ -23,17 +23,6 @@
             </div>
         </div>
     </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var backButton = document.getElementById('backButton');
-            if (backButton) {
-                backButton.addEventListener('click', function(event) {
-                    event.preventDefault();
-                    window.location.href = 'posts.html';
-                });
-            }
-        });
-    </script>
 
     <div class="post-detail">
         <section class="post-header">
@@ -46,7 +35,7 @@
             </div>
             <div class="post-meta">
                 <div class="author-info">
-                    <div class="author-circle" id="authorCircle">👤</div>
+                    <div class="author-circle" id="authorCircle"></div>
                     <div class="author-details">
                         <div class="author-name" id="authorName">Author Nickname</div>
                         <div class="post-time" id="postTime">Just now</div>
@@ -61,7 +50,7 @@
         </section>
 
         <section class="post-stats">
-            <button class="like-button" id="likeButton">Like <span id="likeCount">0</span></button>
+            <button class="like-button" id="likeButton">👍 <span id="likeCount">0</span></button>
             <span class="view-count" id="viewCount">Views: 0</span>
             <span class="comment-count" id="commentCount">Comments: 0</span>
         </section>
@@ -72,20 +61,6 @@
                 <button id="addCommentButton">Add Comment</button>
             </div>
             <div class="comment-list" id="commentList">
-                <div class="comment-item">
-                    <div class="comment-header">
-                        <div class="comment-author-circle">👤</div>
-                        <div class="comment-author-info">
-                            <div class="comment-author-name">Commenter Name</div>
-                            <div class="comment-time">Just now</div>
-                        </div>
-                        <div class="comment-actions">
-                            <button class="edit-comment-button">Edit</button>
-                            <button class="delete-comment-button">Delete</button>
-                        </div>
-                    </div>
-                    <div class="comment-body">Comment content goes here.</div>
-                </div>
             </div>
         </section>
     </div>
