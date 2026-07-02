@@ -17,7 +17,7 @@ public class SignUpRequestDto {
     private String password;
 
     @NotBlank(message = "Enter password again")
-    private String confirmPassword;
+    private String passwordConfirm;
 
     @NotBlank(message = "Nickname is required")
     private String nickname;

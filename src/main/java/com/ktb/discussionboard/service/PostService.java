@@ -1,15 +1,16 @@
 package com.ktb.discussionboard.service;
 
-import com.ktb.discussionboard.domain.Post;
-import com.ktb.discussionboard.domain.PostImage;
-import com.ktb.discussionboard.domain.PostLike;
-import com.ktb.discussionboard.domain.PostReport;
+import com.ktb.discussionboard.domain.*;
 import com.ktb.discussionboard.dto.CreatePostRequestDto;
+import com.ktb.discussionboard.dto.PostPageResponseDto;
 import com.ktb.discussionboard.dto.PostResponseDto;
 import com.ktb.discussionboard.dto.UpdatePostRequestDto;
 import com.ktb.discussionboard.exception.BusinessException;
 import com.ktb.discussionboard.exception.ErrorCode;
 import com.ktb.discussionboard.repository.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ public class PostService {
     
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final CommentRepository commentRepository;
     private final PostLikeRepository postLikeRepository;
     private final PostReportRepository postReportRepository;
     private final PostImageRepository postImageRepository;
@@ -66,7 +68,7 @@ public class PostService {
         return toPostResponseDto(savedPost);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public PostResponseDto getPost(Long postId) {
         Post post = postRepository.findByIdAndDeletedFalseAndHiddenFalse(postId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
@@ -77,10 +79,24 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public List<PostResponseDto> getPosts() {
-        return postRepository.findAllByDeletedFalseAndHiddenFalseOrderByCreatedAtDesc().stream()
+    public PostPageResponseDto getPosts(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Post> postPage = postRepository
+                .findAllByDeletedFalseAndHiddenFalseOrderByCreatedAtDesc(pageable);
+
+        List<PostResponseDto> posts = postPage.getContent().stream()
                 .map(this::toPostResponseDto)
                 .toList();
+
+        return new PostPageResponseDto(
+                postPage.getNumber(),
+                postPage.getSize(),
+                postPage.getTotalElements(),
+                postPage.getTotalPages(),
+                postPage.hasNext(),
+                posts
+        );
     }
 
     @Transactional
@@ -195,14 +211,22 @@ public class PostService {
                 .map(PostImage::getImageUrl)
                 .toList();
 
+        User user = userRepository.findById(post.getUserId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        int commentCount = commentRepository.countByPostId(post.getId());
+
         return new PostResponseDto(
                 post.getId(),
                 post.getUserId(),
+                user.getNickname(),
+                user.getProfileImageUrl(),
                 post.getTitle(),
                 post.getContent(),
                 postImageUrls,
                 post.getLikeCount(),
                 post.getViewCount(),
+                commentCount,
                 post.isEdited(),
                 post.getCreatedAt(),
                 post.getUpdatedAt()

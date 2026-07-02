@@ -1,6 +1,7 @@
 package com.ktb.discussionboard.service;
 
 import com.ktb.discussionboard.domain.Comment;
+import com.ktb.discussionboard.domain.User;
 import com.ktb.discussionboard.dto.CommentListResponseDto;
 import com.ktb.discussionboard.dto.CommentResponseDto;
 import com.ktb.discussionboard.dto.CreateCommentRequestDto;
@@ -118,10 +119,14 @@ public class CommentService {
     }
 
     private CommentResponseDto toCommentResponseDto(Comment comment) {
+        User user = userRepository.findById(comment.getUserId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
         return new CommentResponseDto(
                 comment.getId(),
                 comment.getPostId(),
                 comment.getUserId(),
+                user.getNickname(),
                 comment.getParentCommentId(),
                 comment.getContent(),
                 comment.isDeleted(),

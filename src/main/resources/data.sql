@@ -1,5 +1,4 @@
 INSERT INTO users (
-    id,
     email,
     password,
     nickname,
@@ -10,7 +9,6 @@ INSERT INTO users (
     password_updated_at,
     deleted_at
 ) VALUES (
-    1,
     'denzi@chainsawman.com',
     'strongman1',
     'Pochita',
@@ -23,7 +21,6 @@ INSERT INTO users (
 );
 
 INSERT INTO users (
-    id,
     email,
     password,
     nickname,
@@ -34,7 +31,6 @@ INSERT INTO users (
     password_updated_at,
     deleted_at
 ) VALUES (
-     2,
      'reze@janedoe.com',
      '161616',
      'Bomb',
@@ -47,7 +43,6 @@ INSERT INTO users (
 );
 
 INSERT INTO posts (
-    id,
     user_id,
     title,
     content,
@@ -62,7 +57,6 @@ INSERT INTO posts (
     deleted_at,
     hidden_at
 ) VALUES (
-    1,
     1,
     'I''m chainsaw man',
     'Do you know where the Futamichi Cafe is?',
@@ -79,19 +73,16 @@ INSERT INTO posts (
 );
 
 INSERT INTO post_images (
-    id,
     post_id,
     image_url,
     sort_order
 ) VALUES (
     1,
-    1,
-    'https://pixabay.com/ko/photos/hard-rock-cafe-%EC%8B%9D%EB%8B%B9-3726209/',
+    'https://cdn.pixabay.com/photo/2018/10/05/15/45/hard-rock-cafe-3726209_1280.jpg',
     0
 );
 
 INSERT INTO comments (
-    id,
     post_id,
     user_id,
     parent_comment_id,
@@ -102,7 +93,6 @@ INSERT INTO comments (
     updated_at,
     deleted_at
 ) VALUES (
-    1,
     1,
     2,
     NULL,
@@ -115,7 +105,6 @@ INSERT INTO comments (
 );
 
 INSERT INTO comments (
-    id,
     post_id,
     user_id,
     parent_comment_id,
@@ -126,7 +115,6 @@ INSERT INTO comments (
     updated_at,
     deleted_at
 ) VALUES (
-    2,
     1,
     1,
     1,

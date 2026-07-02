@@ -1,9 +1,6 @@
 package com.ktb.discussionboard.controller;
 
-import com.ktb.discussionboard.dto.CreatePostRequestDto;
-import com.ktb.discussionboard.dto.PostResponseDto;
-import com.ktb.discussionboard.dto.ReportPostRequestDto;
-import com.ktb.discussionboard.dto.UpdatePostRequestDto;
+import com.ktb.discussionboard.dto.*;
 import com.ktb.discussionboard.response.ApiResponse;
 import com.ktb.discussionboard.service.PostService;
 import jakarta.validation.Valid;
@@ -11,8 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -44,9 +39,10 @@ public class PostController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<PostResponseDto>>> getPosts() {
-
-        List<PostResponseDto> response = postService.getPosts();
+    public ResponseEntity<ApiResponse<PostPageResponseDto>> getPosts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        PostPageResponseDto response = postService.getPosts(page, size);
 
         return ResponseEntity.ok(
                 ApiResponse.of("Posts found successfully", response));

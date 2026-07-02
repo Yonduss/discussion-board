@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post detail</title>
+    <link rel="stylesheet" href="/discussionboard/frontend/css/post.css">
+    <link rel="stylesheet" href="/discussionboard/frontend/css/post-detail.css">
+    <link rel="stylesheet" href="/discussionboard/frontend/css/common.css">
+</head>
+<body>
+    <div class="ktb-top-banner">
+        <a href="posts.html" class="back-button" id="backButton">←</a>
+
+        <h2>KTB Board</h2>
+
+        <div class="profile-container">
+            <div class="profile-circle" id="profileCircle">👤</div>
+            <div class="profile-dropdown" id="profileDropdown">
+                <a href="user-edit.html">Edit Profile</a>
+                <a href="password-edit.html">Change Password</a>
+                <a href="login.html" id="logoutButton">Logout</a>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var backButton = document.getElementById('backButton');
+            if (backButton) {
+                backButton.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    window.location.href = 'posts.html';
+                });
+            }
+        });
+    </script>
+
+    <div class="post-detail">
+        <section class="post-header">
+            <div class="post-title-row">
+                <h1 id="postTitle">Post Title</h1>
+                <div class="post-actions">
+                    <button id="editPostButton">Edit</button>
+                    <button id="deletePostButton">Delete</button>
+                </div>
+            </div>
+            <div class="post-meta">
+                <div class="author-info">
+                    <div class="author-circle" id="authorCircle">👤</div>
+                    <div class="author-details">
+                        <div class="author-name" id="authorName">Author Nickname</div>
+                        <div class="post-time" id="postTime">Just now</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="post-content">
+            <p id="postContent">Post content goes here.</p>
+            <div id="postImages" class="post-images"></div>
+        </section>
+
+        <section class="post-stats">
+            <button class="like-button" id="likeButton">Like <span id="likeCount">0</span></button>
+            <span class="view-count" id="viewCount">Views: 0</span>
+            <span class="comment-count" id="commentCount">Comments: 0</span>
+        </section>
+
+        <section class="comment-section">
+            <div class="comment-input-row">
+                <input type="text" id="commentInput" placeholder="Enter comment here">
+                <button id="addCommentButton">Add Comment</button>
+            </div>
+            <div class="comment-list" id="commentList">
+                <div class="comment-item">
+                    <div class="comment-header">
+                        <div class="comment-author-circle">👤</div>
+                        <div class="comment-author-info">
+                            <div class="comment-author-name">Commenter Name</div>
+                            <div class="comment-time">Just now</div>
+                        </div>
+                        <div class="comment-actions">
+                            <button class="edit-comment-button">Edit</button>
+                            <button class="delete-comment-button">Delete</button>
+                        </div>
+                    </div>
+                    <div class="comment-body">Comment content goes here.</div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="/discussionboard/frontend/js/post-detail.js"></script>
+</body>
+</html>

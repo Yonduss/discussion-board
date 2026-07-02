@@ -25,7 +25,7 @@ public class AuthService {
             throw new BusinessException(ErrorCode.NICKNAME_EXISTS);
         }
 
-        if (!request.getPassword().equals(request.getConfirmPassword())) {
+        if (!request.getPassword().equals(request.getPasswordConfirm())) {
             throw new BusinessException(ErrorCode.PASSWORD_MISMATCH);
         }
 

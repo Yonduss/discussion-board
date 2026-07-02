@@ -11,11 +11,14 @@ import java.util.List;
 public class PostResponseDto {
     private Long id;
     private Long userId;
+    private String nickname;
+    private String profileImageUrl;
     private String title;
     private String content;
     private List<String> postImageUrls;
     private int likeCount;
     private int viewCount;
+    private int commentCount;
     private boolean edited;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
