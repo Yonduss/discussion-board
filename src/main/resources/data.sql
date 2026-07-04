@@ -82,6 +82,36 @@ INSERT INTO post_images (
     0
 );
 
+INSERT INTO posts (
+    user_id,
+    title,
+    content,
+    like_count,
+    view_count,
+    reported_count,
+    deleted,
+    edited,
+    hidden,
+    created_at,
+    updated_at,
+    deleted_at,
+    hidden_at
+) VALUES (
+     2,
+     'Looking for a part-timer for the cafe.',
+     'We are looking for the part-timer for the cafe.\nPlease stop by our cafe with your resume.',
+     0,
+     0,
+     0,
+     false,
+     false,
+     false,
+     CURRENT_TIMESTAMP,
+     CURRENT_TIMESTAMP,
+     NULL,
+     NULL
+ );
+
 INSERT INTO comments (
     post_id,
     user_id,
