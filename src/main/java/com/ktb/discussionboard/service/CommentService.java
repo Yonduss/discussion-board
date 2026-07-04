@@ -1,6 +1,7 @@
 package com.ktb.discussionboard.service;
 
 import com.ktb.discussionboard.domain.Comment;
+import com.ktb.discussionboard.domain.Post;
 import com.ktb.discussionboard.domain.User;
 import com.ktb.discussionboard.dto.CommentListResponseDto;
 import com.ktb.discussionboard.dto.CommentResponseDto;
@@ -31,26 +32,29 @@ public class CommentService {
             Long userId,
             Long postId,
             CreateCommentRequestDto request) {
-        userRepository.findByIdAndDeletedFalse(userId)
+
+        User user = userRepository.findByIdAndDeletedFalse(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-        postRepository.findByIdAndDeletedFalseAndHiddenFalse(postId)
+        Post post = postRepository.findByIdAndDeletedFalseAndHiddenFalse(postId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
 
+        Comment parentComment = null;
+
         if (request.getParentCommentId() != null) {
-            Comment parentComment = commentRepository.findByIdAndDeletedFalse(request.getParentCommentId())
+            parentComment = commentRepository.findByIdAndDeletedFalse(request.getParentCommentId())
                     .orElseThrow(() -> new BusinessException(ErrorCode.COMMENT_NOT_FOUND));
 
-            if (!parentComment.getPostId().equals(postId)) {
+            if (!parentComment.getPost().getId().equals(postId)) {
                 throw new BusinessException(ErrorCode.COMMENT_NOT_FOUND);
             }
         }
 
         Comment comment = new Comment(
                 null,
-                postId,
-                userId,
-                request.getParentCommentId(),
+                user,
+                post,
+                parentComment,
                 request.getContent(),
                 false,
                 false,
@@ -93,7 +97,7 @@ public class CommentService {
         Comment comment = commentRepository.findByIdAndDeletedFalse(commentId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.COMMENT_NOT_FOUND));
 
-        if (!comment.getUserId().equals(userId)) {
+        if (!comment.getUser().getId().equals(userId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN);
         }
 
@@ -109,7 +113,7 @@ public class CommentService {
         Comment comment = commentRepository.findByIdAndDeletedFalse(commentId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.COMMENT_NOT_FOUND));
 
-        if (!comment.getUserId().equals(userId)) {
+        if (!comment.getUser().getId().equals(userId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN);
         }
 
@@ -119,15 +123,17 @@ public class CommentService {
     }
 
     private CommentResponseDto toCommentResponseDto(Comment comment) {
-        User user = userRepository.findById(comment.getUserId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        User user = comment.getUser();
+
+        Long parentCommentId = comment.getParentComment() == null
+                ? null : comment.getParentComment().getId();
 
         return new CommentResponseDto(
                 comment.getId(),
-                comment.getPostId(),
-                comment.getUserId(),
+                comment.getPost().getId(),
+                user.getId(),
                 user.getNickname(),
-                comment.getParentCommentId(),
+                parentCommentId,
                 comment.getContent(),
                 comment.isDeleted(),
                 comment.isEdited(),

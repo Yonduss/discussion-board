@@ -8,7 +8,7 @@ import java.util.List;
 
 @Repository
 public interface PostImageRepository extends JpaRepository<PostImage, Long> {
-    List<PostImage> findAllByPostIdOrderBySortOrderAsc(Long postId);
+    List<PostImage> findAllByPost_IdOrderBySortOrderAsc(Long postId);
 
-    void deleteAllByPostId(Long postId);
+    void deleteAllByPost_Id(Long postId);
 }

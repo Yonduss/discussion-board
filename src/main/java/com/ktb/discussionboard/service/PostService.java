@@ -31,12 +31,12 @@ public class PostService {
 
     @Transactional
     public PostResponseDto createPost(Long userId, CreatePostRequestDto request) {
-        userRepository.findByIdAndDeletedFalse(userId)
+        User user = userRepository.findByIdAndDeletedFalse(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         Post post = new Post(
                 null,
-                userId,
+                user,
                 request.getTitle(),
                 request.getContent(),
                 0,
@@ -57,7 +57,7 @@ public class PostService {
             for (int i = 0; i < request.getPostImageUrls().size(); i++) {
                 PostImage postImage = new PostImage(
                         null,
-                        savedPost.getId(),
+                        savedPost,
                         request.getPostImageUrls().get(i),
                         i
                 );
@@ -104,7 +104,7 @@ public class PostService {
         Post post = postRepository.findByIdAndDeletedFalseAndHiddenFalse(postId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
 
-        if (!post.getUserId().equals(userId)) {
+        if (!post.getUser().getId().equals(userId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN);
         }
 
@@ -117,12 +117,12 @@ public class PostService {
         }
 
         if (request.getPostImageUrls() != null) {
-            postImageRepository.deleteAllByPostId(postId);
+            postImageRepository.deleteAllByPost_Id(postId);
 
             for (int i = 0; i < request.getPostImageUrls().size(); i++) {
                 PostImage postImage = new PostImage(
                         null,
-                        postId,
+                        post,
                         request.getPostImageUrls().get(i),
                         i
                 );
@@ -142,30 +142,33 @@ public class PostService {
         Post post = postRepository.findByIdAndDeletedFalseAndHiddenFalse(postId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
 
-        if (!post.getUserId().equals(userId)) {
+        if (!post.getUser().getId().equals(userId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN);
         }
 
         post.setDeleted(true);
         post.setDeletedAt(LocalDateTime.now());
+        //comments should be deleted or what?
+        //they are still alive and became orphan entity
+        //cascade = CascadeType.ALL, orphanRemoval = true
     }
 
     @Transactional
     public void likePost(Long userId, Long postId) {
-        userRepository.findByIdAndDeletedFalse(userId)
+        User user = userRepository.findByIdAndDeletedFalse(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         Post post = postRepository.findByIdAndDeletedFalseAndHiddenFalse(postId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
 
-        if (postLikeRepository.existsByUserIdAndPostId(userId, postId)) {
+        if (postLikeRepository.existsByUser_IdAndPost_Id(userId, postId)) {
             throw new BusinessException(ErrorCode.POST_ALREADY_LIKED);
         }
 
         PostLike postLike = new PostLike(
                 null,
-                userId,
-                postId,
+                user,
+                post,
                 LocalDateTime.now()
         );
 
@@ -176,20 +179,20 @@ public class PostService {
 
     @Transactional
     public void reportPost(Long userId, Long postId, String reason) {
-        userRepository.findByIdAndDeletedFalse(userId)
+        User user = userRepository.findByIdAndDeletedFalse(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         Post post = postRepository.findByIdAndDeletedFalseAndHiddenFalse(postId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
 
-        if (postReportRepository.existsByUserIdAndPostId(userId, postId)) {
+        if (postReportRepository.existsByUser_IdAndPost_Id(userId, postId)) {
             throw new BusinessException(ErrorCode.POST_ALREADY_REPORTED);
         }
 
         PostReport postReport = new PostReport(
                 null,
-                userId,
-                postId,
+                user,
+                post,
                 reason,
                 LocalDateTime.now()
         );
@@ -206,19 +209,18 @@ public class PostService {
 
     private PostResponseDto toPostResponseDto(Post post) {
         List<String> postImageUrls = postImageRepository
-                .findAllByPostIdOrderBySortOrderAsc(post.getId())
+                .findAllByPost_IdOrderBySortOrderAsc(post.getId())
                 .stream()
                 .map(PostImage::getImageUrl)
                 .toList();
 
-        User user = userRepository.findById(post.getUserId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        User user = post.getUser();
 
         int commentCount = commentRepository.countByPostId(post.getId());
 
         return new PostResponseDto(
                 post.getId(),
-                post.getUserId(),
+                user.getId(),
                 user.getNickname(),
                 user.getProfileImageUrl(),
                 post.getTitle(),
