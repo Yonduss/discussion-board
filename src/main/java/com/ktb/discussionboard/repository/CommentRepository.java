@@ -12,7 +12,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     Optional<Comment> findByIdAndDeletedFalse(Long id);
 
-    List<Comment> findAllByPostIdOrderByCreatedAtAsc(Long postId);
+    List<Comment> findAllByPost_IdOrderByCreatedAtAsc(Long postId);
 
-    int countByPostId(Long postId);
+    int countByPost_Id(Long postId);
 }

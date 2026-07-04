@@ -81,7 +81,7 @@ public class CommentService {
         postRepository.findByIdAndDeletedFalseAndHiddenFalse(postId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
 
-        List<CommentResponseDto> comments = commentRepository.findAllByPostIdOrderByCreatedAtAsc(postId)
+        List<CommentResponseDto> comments = commentRepository.findAllByPost_IdOrderByCreatedAtAsc(postId)
                 .stream()
                 .map(this::toCommentResponseDto)
                 .toList();

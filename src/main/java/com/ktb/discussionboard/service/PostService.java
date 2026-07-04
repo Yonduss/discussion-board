@@ -148,9 +148,13 @@ public class PostService {
 
         post.setDeleted(true);
         post.setDeletedAt(LocalDateTime.now());
-        //comments should be deleted or what?
-        //they are still alive and became orphan entity
-        //cascade = CascadeType.ALL, orphanRemoval = true
+
+        List<Comment> comments = commentRepository.findAllByPost_IdOrderByCreatedAtAsc(postId);
+
+        for (Comment comment : comments) {
+            comment.setDeleted(true);
+            comment.setDeletedAt(LocalDateTime.now());
+        }
     }
 
     @Transactional
@@ -216,7 +220,7 @@ public class PostService {
 
         User user = post.getUser();
 
-        int commentCount = commentRepository.countByPostId(post.getId());
+        int commentCount = commentRepository.countByPost_Id(post.getId());
 
         return new PostResponseDto(
                 post.getId(),
