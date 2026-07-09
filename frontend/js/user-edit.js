@@ -1,6 +1,5 @@
-const topProfileCircle = document.getElementById("profileCircle");
-const profileDropdown = document.getElementById("profileDropdown");
-const logoutButton = document.getElementById("logoutButton");
+import api, { requireLogin } from "./api.js";
+import { setupProfileDropdown, setupLogout } from "./common.js";
 
 const profileImageContainer = document.getElementById("profileImageContainer");
 const profileUrlBox = document.getElementById("profileUrlBox");
@@ -12,28 +11,11 @@ const nicknameInput = document.getElementById("nickname");
 const userEditForm = document.getElementById("userEditForm");
 const deleteAccountBtn = document.getElementById("deleteAccountBtn");
 
-const loginUserId = localStorage.getItem("loginUserId");
 
-if (!loginUserId) {
-    alert("Please login first.");
-    window.location.href = "login.html";
-}
+requireLogin();
 
-topProfileCircle.addEventListener("click", function () {
-    profileDropdown.classList.toggle("active");
-});
-
-document.addEventListener("click", function (event) {
-    if (!event.target.closest(".profile-container")) {
-        profileDropdown.classList.remove("active");
-    }
-});
-
-logoutButton.addEventListener("click", function (event) {
-    event.preventDefault();
-    localStorage.clear();
-    window.location.href = "login.html";
-});
+setupProfileDropdown();
+setupLogout();
 
 profileImageContainer.addEventListener("click", function () {
     profileUrlBox.classList.toggle("show");
@@ -53,21 +35,23 @@ profileImageUrlInput.addEventListener("keydown", function (event) {
 loadUser();
 
 async function loadUser() {
-    const response = await fetch(`http://localhost:8080/api/v1/users/${loginUserId}`);
-    const result = await response.json();
+    try {
+        const result = await api.get(
+            `/api/v1/users`
+        );
 
-    if (!response.ok) {
-        alert(result.message);
-        return;
+        const user = result.data;
+
+        emailInput.value = user.email;
+        nicknameInput.value = user.nickname;
+        profileImageUrlInput.value = user.profileImageUrl || "";
+
+        renderProfileImage(user.profileImageUrl);
+
+    } catch (error) {
+        console.error(error);
+        alert(error.message || "Failed to load user.");
     }
-
-    const user = result.data;
-
-    emailInput.value = user.email;
-    nicknameInput.value = user.nickname;
-    profileImageUrlInput.value = user.profileImageUrl || "";
-
-    renderProfileImage(user.profileImageUrl);
 }
 
 function renderProfileImage(imageUrl) {
@@ -92,48 +76,42 @@ userEditForm.addEventListener("submit", async function (event) {
         return;
     }
 
-    const response = await fetch(`http://localhost:8080/api/v1/users/${loginUserId}`, {
-        method: "PATCH",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            nickname,
-            profileImageUrl: profileImageUrl || null
-        })
-    });
+    try {
+        const result = await api.patch(
+            `/api/v1/users`,
+            {
+                nickname,
+                profileImageUrl: profileImageUrl || null
+            }
+        );
 
-    const result = await response.json();
+        localStorage.setItem("loginUserNickname", result.data.nickname);
+        localStorage.setItem("loginUserProfileImageUrl", result.data.profileImageUrl || "");
 
-    if (!response.ok) {
-        alert(result.message);
-        return;
+        alert("Profile updated successfully.");
+        window.location.href = "posts.html";
+    } catch (error) {
+        console.error(error);
+        alert(error.message || "Failed to update Profile.");
     }
-
-    localStorage.setItem("loginUserNickname", result.data.nickname);
-    localStorage.setItem("loginUserProfileImageUrl", result.data.profileImageUrl || "");
-
-    alert("Profile updated successfully.");
-    window.location.href = "posts.html";
 });
 
 deleteAccountBtn.addEventListener("click", async function () {
-    if (!confirm("Are you sure you want to delete your account?")) {
-        return;
+        if (!confirm("Are you sure you want to delete your account?")) {
+            return;
+        }
+
+        try {
+            await api.delete(
+                `/api/v1/users`
+            );
+
+            localStorage.clear();
+            alert("Account deleted successfully.");
+            window.location.href = "login.html";
+        } catch (error) {
+            console.error(error);
+            alert(error.message || "Failed to delete account.");
+        }
     }
-
-    const response = await fetch(`http://localhost:8080/api/v1/users/${loginUserId}`, {
-        method: "DELETE"
-    });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-        alert(result.message);
-        return;
-    }
-
-    localStorage.clear();
-    alert("Account deleted successfully.");
-    window.location.href = "login.html";
-});
+);

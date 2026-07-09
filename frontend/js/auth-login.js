@@ -1,3 +1,5 @@
+import api from "./api.js";
+
 const loginForm = document.getElementById("login-form");
 const signupButton = document.getElementById("signup-button");
 
@@ -7,40 +9,28 @@ loginForm.addEventListener("submit", async function (event) {
     const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value.trim();
 
-    console.log("Login clicked");
-    console.table({ email, password });
-
     try {
-        const response = await fetch("http://localhost:8080/api/v1/auth/login", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
+        const result = await api.post(
+            "/api/v1/auth/login",
+            {
+                email,
+                password
             },
-            body: JSON.stringify({
-                email: email,
-                password: password
-            })
-        });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-            alert(result.message);
-            return;
-        }
+            {
+                auth: false
+            }
+        );
 
         console.log("Login success:", result);
 
-        localStorage.setItem("loginUserId", result.data.id);
         localStorage.setItem("loginUserEmail", result.data.email);
-        localStorage.setItem("loginUserNickname", result.data.nickname);
-        localStorage.setItem("loginUserProfileImageUrl", result.data.profileImageUrl);
+        localStorage.setItem("accessToken", result.data.accessToken);
 
         window.location.href = "posts.html";
 
     } catch (error) {
         console.error("Login error:", error);
-        alert("Server connection failed.");
+        alert(error.message || "Server connection failed.");
     }
 });
 

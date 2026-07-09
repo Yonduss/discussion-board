@@ -1,10 +1,8 @@
+import api, { requireLogin, formatDate } from "./api.js";
+import { setupProfileDropdown, setupLogout } from "./common.js";
+
 const params = new URLSearchParams(window.location.search);
 const postId = params.get("postId");
-const loginUserId = localStorage.getItem("loginUserId");
-
-const profileCircle = document.getElementById("profileCircle");
-const profileDropdown = document.getElementById("profileDropdown");
-const logoutButton = document.getElementById("logoutButton");
 
 const editPostButton = document.getElementById("editPostButton");
 const deletePostButton = document.getElementById("deletePostButton");
@@ -17,49 +15,52 @@ const commentList = document.getElementById("commentList");
 if (!postId) {
     alert("Post id is missing.");
     window.location.href = "posts.html";
+    throw new Error("Post id is missing.");
 }
 
-if (!loginUserId) {
-    alert("Please login first.");
-    window.location.href = "login.html";
-}
+requireLogin();
+
+setupProfileDropdown();
+setupLogout();
 
 loadPostDetail();
 loadComments();
 
 async function loadPostDetail() {
-    const response = await fetch(`http://localhost:8080/api/v1/posts/${postId}`);
-    const result = await response.json();
+    try {
+        const result = await api.get(
+            `/api/v1/posts/${postId}`
+        );
 
-    if (!response.ok) {
-        alert(result.message);
+        const post = result.data;
+
+        document.getElementById("postTitle").textContent = post.title;
+        document.getElementById("postContent").textContent = post.content;
+        document.getElementById("authorName").textContent = post.nickname;
+        document.getElementById("postTime").textContent = formatDate(post.createdAt);
+        document.getElementById("likeCount").textContent = post.likeCount;
+        document.getElementById("viewCount").textContent = `Views: ${post.viewCount}`;
+        document.getElementById("commentCount").textContent = `Comments: ${post.commentCount}`;
+
+        renderPostImages(post.postImageUrls || []);
+    } catch (error) {
+        console.error("Post detail fetch error:", error);
+        alert(error.message || "Failed to load post.");
         window.location.href = "posts.html";
-        return;
     }
-
-    const post = result.data;
-
-    document.getElementById("postTitle").textContent = post.title;
-    document.getElementById("postContent").textContent = post.content;
-    document.getElementById("authorName").textContent = post.nickname;
-    document.getElementById("postTime").textContent = formatDate(post.createdAt);
-    document.getElementById("likeCount").textContent = post.likeCount;
-    document.getElementById("viewCount").textContent = `Views: ${post.viewCount}`;
-    document.getElementById("commentCount").textContent = `Comments: ${post.commentCount}`;
-
-    renderPostImages(post.postImageUrls || []);
 }
 
 async function loadComments() {
-    const response = await fetch(`http://localhost:8080/api/v1/posts/${postId}/comments`);
-    const result = await response.json();
+    try {
+        const result = await api.get(
+            `/api/v1/posts/${postId}/comments`
+        );
 
-    if (!response.ok) {
-        alert(result.message);
-        return;
+        renderComments(result.data.comments);
+    } catch (error) {
+        console.error("Comments fetch error:", error);
+        alert(error.message || "Failed to load comments.");
     }
-
-    renderComments(result.data.comments);
 }
 
 function renderComments(comments) {
@@ -101,22 +102,6 @@ function renderPostImages(imageUrls) {
     });
 }
 
-profileCircle.addEventListener("click", function () {
-    profileDropdown.classList.toggle("active");
-});
-
-document.addEventListener("click", function (event) {
-    if (!event.target.closest(".profile-container")) {
-        profileDropdown.classList.remove("active");
-    }
-});
-
-logoutButton.addEventListener("click", function (event) {
-    event.preventDefault();
-    localStorage.clear();
-    window.location.href = "login.html";
-});
-
 editPostButton.addEventListener("click", function () {
     window.location.href = `post-edit.html?postId=${postId}`;
 });
@@ -126,36 +111,31 @@ deletePostButton.addEventListener("click", async function () {
         return;
     }
 
-    const response = await fetch(
-        `http://localhost:8080/api/v1/posts/${loginUserId}/${postId}`,
-        { method: "DELETE" }
-    );
+    try {
+        await api.delete(
+            `/api/v1/posts/${postId}`
+        );
 
-    const result = await response.json();
-
-    if (!response.ok) {
-        alert(result.message);
-        return;
+        alert("Post deleted successfully.");
+        window.location.href = "posts.html";
+    } catch (error) {
+        console.error("Delete post error:", error);
+        alert(error.message || "Failed to delete post.");
     }
-
-    alert("Post deleted successfully.");
-    window.location.href = "posts.html";
 });
 
 likeButton.addEventListener("click", async function () {
-    const response = await fetch(
-        `http://localhost:8080/api/v1/posts/${loginUserId}/${postId}/likes`,
-        { method: "POST" }
-    );
+    try {
+        await api.post(
+            `/api/v1/posts/${postId}/likes`
+        );
 
-    const result = await response.json();
-
-    if (!response.ok) {
-        alert(result.message);
-        return;
+        await loadPostDetail();
+    } catch (error) {
+        console.error("Like error:", error);
+        alert(error.message || "Failed to like post.");
     }
 
-    await loadPostDetail();
 });
 
 addCommentButton.addEventListener("click", async function () {
@@ -167,47 +147,22 @@ addCommentButton.addEventListener("click", async function () {
     }
 
     try {
-        const response = await fetch(
-            `http://localhost:8080/api/v1/posts/${postId}/comments/${loginUserId}`,
+        await api.post(
+            `/api/v1/posts/${postId}/comments`,
             {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    content: content
-                })
+                content
             }
         );
-
-        const result = await response.json();
-
-        if (!response.ok) {
-            alert(result.message);
-            return;
-        }
 
         commentInput.value = "";
 
         await loadComments();
         await loadPostDetail();
     } catch (error) {
-        console.error(error);
-        alert("Failed to add a comment.");
+        console.error("Adding comment error:", error);
+        alert(error.message || "Failed to add a comment.");
     }
 });
-
-function formatDate(dateString) {
-    const date = new Date(dateString);
-
-    return date.toLocaleString("ko-KR", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit"
-    });
-}
 
 commentList.addEventListener("click", async function (event) {
     const editButton = event.target.closest(".edit-comment-button");
@@ -241,44 +196,33 @@ commentList.addEventListener("click", async function (event) {
 });
 
 async function updateComment(commentId, content) {
-    const response = await fetch(
-        `http://localhost:8080/api/v1/posts/${postId}/comments/${loginUserId}/${commentId}`,
-        {
-            method: "PATCH",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ content })
-        }
-    );
+    try {
+        await api.patch(
+            `/api/v1/posts/${postId}/comments/${commentId}`,
+            {
+                content
+            }
+        );
 
-    const result = await response.json();
-
-    if (!response.ok) {
-        alert(result.message);
-        return;
+        await loadComments();
+    } catch (error) {
+        console.error("Update comment error:", error);
+        alert(error.message || "Failed to update comment.");
     }
-
-    await loadComments();
 }
 
 async function deleteComment(commentId) {
-    const response = await fetch(
-        `http://localhost:8080/api/v1/posts/${postId}/comments/${loginUserId}/${commentId}`,
-        {
-            method: "DELETE"
-        }
-    );
+    try {
+        await api.delete(
+            `/api/v1/posts/${postId}/comments/${commentId}`
+        );
 
-    const result = await response.json();
-
-    if (!response.ok) {
-        alert(result.message);
-        return;
+        await loadComments();
+        await loadPostDetail();
+    } catch (error) {
+        console.error("Delete comment error:", error);
+        alert(error.message || "Failed to delete comment.");
     }
-
-    await loadComments();
-    await loadPostDetail();
 }
 
 const backButton = document.getElementById("backButton");

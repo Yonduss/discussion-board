@@ -1,27 +1,15 @@
-const profileCircle = document.getElementById("profileCircle");
-const profileDropdown = document.getElementById("profileDropdown");
+import api, { requireLogin, formatDate } from "./api.js";
+import { setupProfileDropdown, setupLogout } from "./common.js";
+
+requireLogin();
+
+setupProfileDropdown();
+setupLogout();
+
 const createPostButton = document.getElementById("createPostButton");
-
-profileCircle.addEventListener("click", function () {
-    profileDropdown.classList.toggle("active");
-});
-
-document.addEventListener("click", function (event) {
-    if (!event.target.closest(".profile-container")) {
-        profileDropdown.classList.remove("active");
-    }
-});
 
 createPostButton.addEventListener("click", function () {
     window.location.href = "post-write.html";
-});
-
-const logoutButton = document.getElementById("logoutButton");
-
-logoutButton.addEventListener("click", function (event) {
-    event.preventDefault();
-    localStorage.clear();
-    window.location.href = "login.html";
 });
 
 let currentPage = 0;
@@ -44,16 +32,9 @@ async function loadPosts() {
     isLoading = true;
 
     try {
-        const response = await fetch(
-            `http://localhost:8080/api/v1/posts?page=${currentPage}&size=${pageSize}`
+        const result = await api.get(
+            `/api/v1/posts?page=${currentPage}&size=${pageSize}`
         );
-
-        const result = await response.json();
-
-        if (!response.ok) {
-            alert(result.message);
-            return;
-        }
 
         const pageData = result.data;
         renderPosts(pageData.posts);
@@ -63,7 +44,7 @@ async function loadPosts() {
 
     } catch (error) {
         console.error("Posts fetch error:", error);
-        alert("Failed to load posts.");
+        alert(error.message || "Failed to load posts.");
     } finally {
         isLoading = false;
     }
@@ -116,15 +97,3 @@ window.addEventListener("scroll", function () {
         loadPosts();
     }
 });
-
-function formatDate(dateString) {
-    const date = new Date(dateString);
-
-    return date.toLocaleString("ko-KR", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit"
-    });
-}

@@ -1,3 +1,5 @@
+import api from "./api.js";
+
 const profileImageContainer = document.getElementById("profileImageContainer");
 const profileUrlBox = document.getElementById("profileUrlBox");
 const profileImageUrlInput = document.getElementById("profileImageUrl");
@@ -103,33 +105,25 @@ signupForm.addEventListener("submit", async function (e) {
     }
 
     try {
-        const response = await fetch("http://localhost:8080/api/v1/users/signup", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                email: email,
-                password: password,
-                passwordConfirm: passwordConfirm,
-                nickname: nickname,
+        await api.post(
+            "/api/v1/users/signup",
+            {
+                email,
+                password,
+                passwordConfirm,
+                nickname,
                 profileImageUrl: profileImageUrl || null
-            })
-        });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-            alert(result.message);
-            return;
-        }
+            },
+            {
+                auth: false
+            }
+        );
 
         alert("Sign up successful!");
         window.location.href = "login.html";
-
     } catch (error) {
         console.error("Sign up error:", error);
-        alert("Server connection failed.");
+        alert(error.message || "Server connection failed.");
     }
 });
 

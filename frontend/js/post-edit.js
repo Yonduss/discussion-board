@@ -1,8 +1,5 @@
-const profileCircle = document.getElementById("profileCircle");
-const profileDropdown = document.getElementById("profileDropdown");
-const logoutButton = document.getElementById("logoutButton");
-
-const loginUserId = localStorage.getItem("loginUserId");
+import api, { requireLogin } from "./api.js";
+import { setupProfileDropdown, setupLogout } from "./common.js";
 
 const params = new URLSearchParams(window.location.search);
 const postId = params.get("postId");
@@ -13,44 +10,24 @@ const imageInputs = document.getElementById("imageInputs");
 const addImageButton = document.getElementById("addImageButton");
 const postForm = document.getElementById("postForm");
 
-if (!loginUserId) {
-    alert("Please login first.");
-    window.location.href = "login.html";
-}
-
 if (!postId) {
     alert("Post id is missing.");
     window.location.href = "posts.html";
+    throw new Error("Post id is missing.");
 }
 
-profileCircle.addEventListener("click", function () {
-    profileDropdown.classList.toggle("active");
-});
+requireLogin();
 
-document.addEventListener("click", function (event) {
-    if (!event.target.closest(".profile-container")) {
-        profileDropdown.classList.remove("active");
-    }
-});
-
-logoutButton.addEventListener("click", function (event) {
-    event.preventDefault();
-    localStorage.clear();
-    window.location.href = "login.html";
-});
+setupProfileDropdown();
+setupLogout();
 
 loadPost();
 
 async function loadPost() {
     try {
-        const response = await fetch(`http://localhost:8080/api/v1/posts/${postId}`);
-        const result = await response.json();
-
-        if (!response.ok) {
-            alert(result.message);
-            window.location.href = "posts.html";
-            return;
-        }
+        const result = await api.get(
+            `/api/v1/posts/${postId}`
+        );
 
         const post = result.data;
 
@@ -60,10 +37,9 @@ async function loadPost() {
         postContentInput.value = post.content;
 
         renderImageInputs(post.postImageUrls || []);
-
     } catch (error) {
-        console.error(error);
-        alert("Failed to load post.");
+        console.error("Load post error:", error);
+        alert(error.message || "Failed to load post.");
     }
 }
 
@@ -113,32 +89,18 @@ postForm.addEventListener("submit", async function (event) {
     }
 
     try {
-        const response = await fetch(
-            `http://localhost:8080/api/v1/posts/${loginUserId}/${postId}`,
+        await api.patch(
+            `/api/v1/posts/${postId}`,
             {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    content,
-                    postImageUrls
-                })
+                content,
+                postImageUrls
             }
         );
 
-        const result = await response.json();
-
-        if (!response.ok) {
-            alert(result.message);
-            return;
-        }
-
         alert("Post updated successfully.");
         window.location.href = `post-detail.html?postId=${postId}`;
-
     } catch (error) {
         console.error(error);
-        alert("Failed to update post.");
+        alert(error.message || "Failed to update post.");
     }
 });

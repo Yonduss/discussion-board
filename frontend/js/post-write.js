@@ -1,30 +1,10 @@
-const profileCircle = document.getElementById("profileCircle");
-const profileDropdown = document.getElementById("profileDropdown");
+import api, { requireLogin } from "./api.js";
+import { setupProfileDropdown, setupLogout } from "./common.js";
 
-profileCircle.addEventListener("click", function () {
-    profileDropdown.classList.toggle("active");
-});
+requireLogin();
 
-document.addEventListener("click", function (event) {
-    if (!event.target.closest(".profile-container")) {
-        profileDropdown.classList.remove("active");
-    }
-});
-
-const logoutButton = document.getElementById("logoutButton");
-
-logoutButton.addEventListener("click", function (event) {
-    event.preventDefault();
-    localStorage.clear();
-    window.location.href = "login.html";
-});
-
-const loginUserId = localStorage.getItem("loginUserId");
-
-if (!loginUserId) {
-    alert("Please login first.");
-    window.location.href = "login.html";
-}
+setupProfileDropdown();
+setupLogout();
 
 document.getElementById("addImageButton").addEventListener("click", function () {
     const imageInputs = document.getElementById("imageInputs");
@@ -57,30 +37,19 @@ document.getElementById("postForm").addEventListener("submit", async function (e
     }
 
     try {
-        const response = await fetch(`http://localhost:8080/api/v1/posts/${loginUserId}`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
+        const result = await api.post(
+            `/api/v1/posts`,
+            {
                 title,
                 content,
                 postImageUrls
-            })
-        });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-            alert(result.message);
-            return;
-        }
+            }
+        );
 
         alert("Post created successfully.");
         window.location.href = `post-detail.html?postId=${result.data.id}`;
-
     } catch (error) {
         console.error(error);
-        alert("Failed to create post.");
+        alert(error.message || "Failed to create post.");
     }
 });
