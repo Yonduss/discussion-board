@@ -29,11 +29,11 @@ public class CommentService {
 
     @Transactional
     public CommentResponseDto createComment(
-            Long userId,
+            String email,
             Long postId,
             CreateCommentRequestDto request) {
 
-        User user = userRepository.findByIdAndDeletedFalse(userId)
+        User user = userRepository.findByEmailAndDeletedFalse(email)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         Post post = postRepository.findByIdAndDeletedFalseAndHiddenFalse(postId)
@@ -91,13 +91,17 @@ public class CommentService {
 
     @Transactional
     public CommentResponseDto updateComment(
-            Long userId,
+            String email,
             Long commentId,
             UpdateCommentRequestDto request) {
+
+        User user = userRepository.findByEmailAndDeletedFalse(email)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
         Comment comment = commentRepository.findByIdAndDeletedFalse(commentId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.COMMENT_NOT_FOUND));
 
-        if (!comment.getUser().getId().equals(userId)) {
+        if (!comment.getUser().getId().equals(user.getId())) {
             throw new BusinessException(ErrorCode.FORBIDDEN);
         }
 
@@ -109,11 +113,14 @@ public class CommentService {
     }
 
     @Transactional
-    public void deleteComment(Long userId, Long commentId) {
+    public void deleteComment(String email, Long commentId) {
+        User user = userRepository.findByEmailAndDeletedFalse(email)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
         Comment comment = commentRepository.findByIdAndDeletedFalse(commentId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.COMMENT_NOT_FOUND));
 
-        if (!comment.getUser().getId().equals(userId)) {
+        if (!comment.getUser().getId().equals(user.getId())) {
             throw new BusinessException(ErrorCode.FORBIDDEN);
         }
 

@@ -27,6 +27,8 @@ public enum ErrorCode {
 
     INVALID_EMAIL_OR_PASSWORD("Invalid email or password", HttpStatus.UNAUTHORIZED),
 
+    INVALID_REFRESH_TOKEN("invalid_refresh_token", HttpStatus.UNAUTHORIZED),
+
     FORBIDDEN("Forbidden access", HttpStatus.FORBIDDEN),
 
     USER_NOT_FOUND("User not found", HttpStatus.NOT_FOUND),

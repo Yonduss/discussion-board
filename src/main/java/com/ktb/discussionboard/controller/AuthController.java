@@ -1,9 +1,6 @@
 package com.ktb.discussionboard.controller;
 
-import com.ktb.discussionboard.dto.LoginRequestDto;
-import com.ktb.discussionboard.dto.LoginResponseDto;
-import com.ktb.discussionboard.dto.SignUpRequestDto;
-import com.ktb.discussionboard.dto.SignUpResponseDto;
+import com.ktb.discussionboard.dto.*;
 import com.ktb.discussionboard.response.ApiResponse;
 import com.ktb.discussionboard.service.AuthService;
 import jakarta.validation.Valid;
@@ -43,5 +40,15 @@ public class AuthController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.of("Login success", response));
+    }
+
+    @PostMapping("/auth/reissue")
+    public ResponseEntity<ApiResponse<TokenReissueResponseDto>> reissue(
+            @RequestBody TokenReissueRequestDto request) {
+        TokenReissueResponseDto result = authService.reissue(request);
+
+        return ResponseEntity.ok(
+                ApiResponse.of("Token reissued successfully", result)
+        );
     }
 }

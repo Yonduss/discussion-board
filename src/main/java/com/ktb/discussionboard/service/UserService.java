@@ -6,7 +6,9 @@ import com.ktb.discussionboard.dto.UpdateUserProfileRequestDto;
 import com.ktb.discussionboard.dto.UserResponseDto;
 import com.ktb.discussionboard.exception.BusinessException;
 import com.ktb.discussionboard.exception.ErrorCode;
+import com.ktb.discussionboard.repository.RefreshTokenRepository;
 import com.ktb.discussionboard.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,18 +20,20 @@ import java.time.LocalDateTime;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional(readOnly = true)
-    public UserResponseDto getUser(Long userId) {
-        User user = userRepository.findByIdAndDeletedFalse(userId)
+    public UserResponseDto getUser(String email) {
+        User user = userRepository.findByEmailAndDeletedFalse(email)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         return toUserResponseDto(user);
     }
 
     @Transactional
-    public UserResponseDto updateUserProfile(Long userId, UpdateUserProfileRequestDto request) {
-        User user = userRepository.findByIdAndDeletedFalse(userId)
+    public UserResponseDto updateUserProfile(String email, UpdateUserProfileRequestDto request) {
+        User user = userRepository.findByEmailAndDeletedFalse(email)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         if (request.getNickname() != null) {
@@ -51,11 +55,11 @@ public class UserService {
     }
 
     @Transactional
-    public void changePassword(Long userId, ChangePasswordRequestDto request) {
-        User user = userRepository.findByIdAndDeletedFalse(userId)
+    public void changePassword(String email, ChangePasswordRequestDto request) {
+        User user = userRepository.findByEmailAndDeletedFalse(email)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-        if (!user.getPassword().equals(request.getCurrentPassword())) {
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
             throw new BusinessException(ErrorCode.CURRENT_PASSWORD_MISMATCH);
         }
 
@@ -63,18 +67,22 @@ public class UserService {
             throw new BusinessException(ErrorCode.PASSWORD_MISMATCH);
         }
 
-        if (user.getPassword().equals(request.getNewPassword())) {
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
             throw new BusinessException(ErrorCode.SAME_AS_OLD_PASSWORD);
         }
 
-        user.setPassword(request.getNewPassword());
+        String encodedNewPassword = passwordEncoder.encode(request.getNewPassword());
+
+        user.setPassword(encodedNewPassword);
         user.setPasswordUpdatedAt(LocalDateTime.now());
     }
 
     @Transactional
-    public void deleteUser(Long userId) {
-        User user = userRepository.findByIdAndDeletedFalse(userId)
+    public void deleteUser(String email) {
+        User user = userRepository.findByEmailAndDeletedFalse(email)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        refreshTokenRepository.deleteByUser_Id(user.getId());
 
         user.setDeleted(true);
         user.setNickname("Unknown user");

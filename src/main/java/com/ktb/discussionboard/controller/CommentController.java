@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,13 +20,15 @@ public class CommentController {
 
     private final CommentService commentService;
 
-    @PostMapping("/{userId}")
+    @PostMapping
     public ResponseEntity<ApiResponse<CommentResponseDto>> createComment(
-            @PathVariable Long userId,
+            Authentication authentication,
             @PathVariable Long postId,
             @Valid @RequestBody CreateCommentRequestDto request) {
 
-        CommentResponseDto response = commentService.createComment(userId, postId, request);
+        String email = authentication.getName();
+
+        CommentResponseDto response = commentService.createComment(email, postId, request);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -52,24 +55,28 @@ public class CommentController {
                 ApiResponse.of("Comments found successfully", response));
     }
 
-    @PatchMapping("/{userId}/{commentId}")
+    @PatchMapping("/{commentId}")
     public ResponseEntity<ApiResponse<CommentResponseDto>> updateComment(
-            @PathVariable Long userId,
+            Authentication authentication,
             @PathVariable Long commentId,
             @Valid @RequestBody UpdateCommentRequestDto request) {
 
-        CommentResponseDto response = commentService.updateComment(userId, commentId, request);
+        String email = authentication.getName();
+
+        CommentResponseDto response = commentService.updateComment(email, commentId, request);
 
         return ResponseEntity.ok(
                 ApiResponse.of("Comment updated successfully", response));
     }
 
-    @DeleteMapping("/{userId}/{commentId}")
+    @DeleteMapping("/{commentId}")
     public ResponseEntity<ApiResponse<Void>> deleteComment(
-            @PathVariable Long userId,
+            Authentication authentication,
             @PathVariable Long commentId) {
 
-        commentService.deleteComment(userId, commentId);
+        String email = authentication.getName();
+
+        commentService.deleteComment(email, commentId);
 
         return ResponseEntity.ok(
                 ApiResponse.of("Comment deleted successfully", null));

@@ -8,6 +8,7 @@ import com.ktb.discussionboard.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,43 +18,51 @@ public class UserController {
 
     private final UserService userService;
 
-    @GetMapping("/{userId}")
+    @GetMapping
     public ResponseEntity<ApiResponse<UserResponseDto>> getUser(
-            @PathVariable Long userId) {
+            Authentication authentication) {
 
-        UserResponseDto response = userService.getUser(userId);
+        String email = authentication.getName();
+
+        UserResponseDto result = userService.getUser(email);
 
         return ResponseEntity.ok(
-                ApiResponse.of("User found successfully", response));
+                ApiResponse.of("User found successfully", result));
     }
 
-    @PatchMapping("/{userId}")
+    @PatchMapping
     public ResponseEntity<ApiResponse<UserResponseDto>> updateUserProfile(
-            @PathVariable Long userId,
+            Authentication authentication,
             @RequestBody UpdateUserProfileRequestDto request) {
 
-        UserResponseDto response = userService.updateUserProfile(userId, request);
+        String email = authentication.getName();
+
+        UserResponseDto result = userService.updateUserProfile(email, request);
 
         return ResponseEntity.ok(
-                ApiResponse.of("User profile updated successfully", response));
+                ApiResponse.of("User profile updated successfully", result));
     }
 
-    @PatchMapping("/{userId}/password")
+    @PatchMapping("/password")
     public ResponseEntity<ApiResponse<Void>> changePassword(
-            @PathVariable Long userId,
+            Authentication authentication,
             @Valid @RequestBody ChangePasswordRequestDto request) {
 
-        userService.changePassword(userId, request);
+        String email = authentication.getName();
+
+        userService.changePassword(email, request);
 
         return ResponseEntity.ok(
                 ApiResponse.of("Password changed successfully", null));
     }
 
-    @DeleteMapping("/{userId}")
+    @DeleteMapping
     public ResponseEntity<ApiResponse<Void>> deleteUser(
-            @PathVariable Long userId) {
+            Authentication authentication) {
 
-        userService.deleteUser(userId);
+        String email = authentication.getName();
+
+        userService.deleteUser(email);
 
         return ResponseEntity.ok(
                 ApiResponse.of("User deleted successfully", null));

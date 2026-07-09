@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -16,16 +17,18 @@ public class PostController {
 
     private final PostService postService;
 
-    @PostMapping("/{userId}")
+    @PostMapping
     public ResponseEntity<ApiResponse<PostResponseDto>> createPost(
-            @PathVariable Long userId,
+            Authentication authentication,
             @Valid @RequestBody CreatePostRequestDto request) {
 
-        PostResponseDto response = postService.createPost(userId, request);
+        String email = authentication.getName();
+
+        PostResponseDto result = postService.createPost(email, request);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(ApiResponse.of("Post created successfully", response));
+                .body(ApiResponse.of("Post created successfully", result));
     }
 
     @GetMapping("/{postId}")
@@ -48,47 +51,55 @@ public class PostController {
                 ApiResponse.of("Posts found successfully", response));
     }
 
-    @PatchMapping("/{userId}/{postId}")
+    @PatchMapping("/{postId}")
     public ResponseEntity<ApiResponse<PostResponseDto>> updatePost(
-            @PathVariable Long userId,
+            Authentication authentication,
             @PathVariable Long postId,
             @RequestBody UpdatePostRequestDto request) {
 
-        PostResponseDto response = postService.updatePost(userId, postId, request);
+        String email = authentication.getName();
+
+        PostResponseDto result = postService.updatePost(email, postId, request);
 
         return ResponseEntity.ok(
-                ApiResponse.of("Post updated successfully", response));
+                ApiResponse.of("Post updated successfully", result));
     }
 
-    @PostMapping("/{userId}/{postId}/likes")
+    @PostMapping("/{postId}/likes")
     public ResponseEntity<ApiResponse<Void>> likePost(
-            @PathVariable Long userId,
+            Authentication authentication,
             @PathVariable Long postId) {
 
-        postService.likePost(userId, postId);
+        String email = authentication.getName();
+
+        postService.likePost(email, postId);
 
         return ResponseEntity.ok(
                 ApiResponse.of("Post liked successfully", null));
     }
 
-    @PostMapping("/{userId}/{postId}/reports")
+    @PostMapping("/{postId}/reports")
     public ResponseEntity<ApiResponse<Void>> reportPost(
-            @PathVariable Long userId,
+            Authentication authentication,
             @PathVariable Long postId,
             @Valid @RequestBody ReportPostRequestDto request) {
 
-        postService.reportPost(userId, postId, request.getReason());
+        String email = authentication.getName();
+
+        postService.reportPost(email, postId, request.getReason());
 
         return ResponseEntity.ok(
                 ApiResponse.of("Post reported successfully", null));
     }
 
-    @DeleteMapping("/{userId}/{postId}")
+    @DeleteMapping("/{postId}")
     public ResponseEntity<ApiResponse<Void>> deletePost(
-            @PathVariable Long userId,
+            Authentication authentication,
             @PathVariable Long postId) {
 
-        postService.deletePost(userId, postId);
+        String email = authentication.getName();
+
+        postService.deletePost(email, postId);
 
         return ResponseEntity.ok(
                 ApiResponse.of("Post deleted successfully", null));

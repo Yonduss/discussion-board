@@ -30,8 +30,8 @@ public class PostService {
     private final PostImageRepository postImageRepository;
 
     @Transactional
-    public PostResponseDto createPost(Long userId, CreatePostRequestDto request) {
-        User user = userRepository.findByIdAndDeletedFalse(userId)
+    public PostResponseDto createPost(String email, CreatePostRequestDto request) {
+        User user = userRepository.findByEmailAndDeletedFalse(email)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         Post post = new Post(
@@ -100,11 +100,14 @@ public class PostService {
     }
 
     @Transactional
-    public PostResponseDto updatePost(Long userId, Long postId, UpdatePostRequestDto request) {
+    public PostResponseDto updatePost(String email, Long postId, UpdatePostRequestDto request) {
         Post post = postRepository.findByIdAndDeletedFalseAndHiddenFalse(postId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
 
-        if (!post.getUser().getId().equals(userId)) {
+        User user = userRepository.findByEmailAndDeletedFalse(email)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        if (!post.getUser().getId().equals(user.getId())) {
             throw new BusinessException(ErrorCode.FORBIDDEN);
         }
 
@@ -138,11 +141,14 @@ public class PostService {
     }
 
     @Transactional
-    public void deletePost(Long userId, Long postId) {
+    public void deletePost(String email, Long postId) {
         Post post = postRepository.findByIdAndDeletedFalseAndHiddenFalse(postId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
 
-        if (!post.getUser().getId().equals(userId)) {
+        User user = userRepository.findByEmailAndDeletedFalse(email)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        if (!post.getUser().getId().equals(user.getId())) {
             throw new BusinessException(ErrorCode.FORBIDDEN);
         }
 
@@ -158,14 +164,14 @@ public class PostService {
     }
 
     @Transactional
-    public void likePost(Long userId, Long postId) {
-        User user = userRepository.findByIdAndDeletedFalse(userId)
+    public void likePost(String email, Long postId) {
+        User user = userRepository.findByEmailAndDeletedFalse(email)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         Post post = postRepository.findByIdAndDeletedFalseAndHiddenFalse(postId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
 
-        if (postLikeRepository.existsByUser_IdAndPost_Id(userId, postId)) {
+        if (postLikeRepository.existsByUser_IdAndPost_Id(user.getId(), postId)) {
             throw new BusinessException(ErrorCode.POST_ALREADY_LIKED);
         }
 
@@ -182,14 +188,14 @@ public class PostService {
     }
 
     @Transactional
-    public void reportPost(Long userId, Long postId, String reason) {
-        User user = userRepository.findByIdAndDeletedFalse(userId)
+    public void reportPost(String email, Long postId, String reason) {
+        User user = userRepository.findByEmailAndDeletedFalse(email)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         Post post = postRepository.findByIdAndDeletedFalseAndHiddenFalse(postId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
 
-        if (postReportRepository.existsByUser_IdAndPost_Id(userId, postId)) {
+        if (postReportRepository.existsByUser_IdAndPost_Id(user.getId(), postId)) {
             throw new BusinessException(ErrorCode.POST_ALREADY_REPORTED);
         }
 

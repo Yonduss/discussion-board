@@ -5,4 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PostLikeRepository extends JpaRepository<PostLike, Long> {
     boolean existsByUser_IdAndPost_Id(Long userId, Long postId);
+    //changed to String from Long userId
+    //changed to Email from User_Id
 }

@@ -8,4 +8,6 @@ import org.springframework.stereotype.Repository;
 
 public interface PostReportRepository extends JpaRepository<PostReport, Long> {
     boolean existsByUser_IdAndPost_Id(Long userId, Long postId);
+    //changed to String from Long userId
+    //changed to Email from User_Id
 }
