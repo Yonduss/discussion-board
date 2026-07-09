@@ -72,16 +72,6 @@ INSERT INTO posts (
     NULL
 );
 
-INSERT INTO post_images (
-    post_id,
-    image_url,
-    sort_order
-) VALUES (
-    1,
-    'https://cdn.pixabay.com/photo/2018/10/05/15/45/hard-rock-cafe-3726209_1280.jpg',
-    0
-);
-
 INSERT INTO posts (
     user_id,
     title,
@@ -99,7 +89,7 @@ INSERT INTO posts (
 ) VALUES (
      2,
      'Looking for a part-timer for the cafe.',
-     'We are looking for the part-timer for the cafe.\nPlease stop by our cafe with your resume.',
+     'We are looking for the part-timer for the cafe. Please stop by our cafe with your resume.',
      0,
      0,
      0,
@@ -154,4 +144,14 @@ INSERT INTO comments (
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP,
     NULL
+);
+
+INSERT INTO post_images (
+    post_id,
+    image_url,
+    sort_order
+) VALUES (
+    1,
+    'https://cdn.pixabay.com/photo/2018/10/05/15/45/hard-rock-cafe-3726209_1280.jpg',
+    0
 );
