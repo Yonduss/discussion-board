@@ -15,3 +15,8 @@ spring:
       ddl-auto: create
     show-sql: true
     defer-datasource-initialization: true
+
+jwt:
+  secret: "my-secret-key-my-secret-key-my-secret-key-123456"
+  access-token-expiration: 3600000
+  refresh-token-expiration: 1209600000
