@@ -66,7 +66,7 @@ public class AuthService {
 
     public LoginResponseDto login(LoginRequestDto request) {
         try {
-            Authentication authentication = authenticationManager.authenticate(
+            authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             request.getEmail(),
                             request.getPassword()
