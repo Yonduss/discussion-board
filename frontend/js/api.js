@@ -77,30 +77,29 @@ async function request(path, options = {}) {
         fetchOptions.body = JSON.stringify(body);
     }
 
+    let response;
+
     try {
-        const response = await fetch(`${API_BASE_URL}${path}`, fetchOptions);
-        const result = await parseResponse(response);
-
-        if (!response.ok) {
-            throw new APIError(
-                result?.message || `Request failed with status ${response.status}`,
-                response.status,
-                result
-            );
-        }
-
-        return result;
+        response = await fetch(`${API_BASE_URL}${path}`, fetchOptions);
     } catch (error) {
-        if (error instanceof APIError) {
-            throw error;
-        }
-
         throw new APIError(
             error.message || "Server connection failed.",
             0,
             null
         );
     }
+
+    const result = await parseResponse(response);
+
+    if (!response.ok) {
+        throw new APIError(
+            result?.message || `Request failed with status ${response.status}`,
+            response.status,
+            result
+        );
+    }
+
+    return result;
 }
 
 const api = {
