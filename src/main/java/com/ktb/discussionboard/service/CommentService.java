@@ -140,6 +140,7 @@ public class CommentService {
                 comment.getPost().getId(),
                 user.getId(),
                 user.getNickname(),
+                user.getProfileImageUrl(),
                 parentCommentId,
                 comment.getContent(),
                 comment.isDeleted(),

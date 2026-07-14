@@ -12,6 +12,7 @@ public class CommentResponseDto {
     private Long postId;
     private Long userId;
     private String nickname;
+    private String profileImageUrl;
     private Long parentCommentId;
     private String content;
     private boolean deleted;
