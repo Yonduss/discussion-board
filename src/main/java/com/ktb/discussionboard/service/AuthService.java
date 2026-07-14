@@ -75,7 +75,7 @@ public class AuthService {
             throw new BusinessException(ErrorCode.INVALID_EMAIL_OR_PASSWORD);
         }
 
-        User user = userRepository.findByEmail(request.getEmail())
+        User user = userRepository.findByEmailAndDeletedFalse(request.getEmail())
                 .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_EMAIL_OR_PASSWORD));
 
         String accessToken = jwtTokenProvider.generateAccessToken(user.getEmail());
