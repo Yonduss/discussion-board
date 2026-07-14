@@ -3,15 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Post write</title>
+    <title>2026 FIFA WC Board</title>
     <link rel="stylesheet" href="./css/post.css">
     <link rel="stylesheet" href="./css/post-write.css">
     <link rel="stylesheet" href="./css/common.css">
 </head>
 
 <body>
-    <div class="ktb-top-banner">
-        <h2>KTB Board</h2>
+    <div class="top-banner">
+        <a class="logo-img" href="posts.html">
+            <img src="/frontend/images/WC26_logo.svg" alt="logo" class="logo-img">
+        </a>
+
+        <h2>2026 FIFA WORLD CUP™</h2>
 
         <div class="profile-container">
             <div class="profile-circle" id="profileCircle">👤</div>
@@ -25,26 +29,29 @@
 
     <div class="post-write-container">
         <h3>Create New Post</h3>
+
         <form id="postForm">
             <div class="form-group">
                 <label for="postTitle">Title</label>
                 <input type="text" id="postTitle" name="title" placeholder="Enter title" required>
             </div>
+
             <div class="form-group">
-                <label for="postContent">Content</label>
-                <textarea id="postContent" name="content" rows="8" placeholder="Enter content" required></textarea>
+                <label for="postContent">Contents</label>
+                <textarea id="postContent" name="content" rows="8" placeholder="Enter contents" required></textarea>
             </div>
+
             <div class="form-group">
                 <label>Images</label>
                 <div id="imageInputs">
                     <div class="image-input-row">
-                        <label>
-                            <input type="url" name="images[]" placeholder="Image URL">
-                        </label>
+                        <input name="images[]" placeholder="Enter Image URL" type="url">
                     </div>
                 </div>
+
                 <button type="button" id="addImageButton">Add image</button>
             </div>
+
             <button type="submit" id="createPostButton">Create post</button>
         </form>
     </div>

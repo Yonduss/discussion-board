@@ -3,15 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Profile</title>
+    <title>2026 FIFA WC Board</title>
     <link rel="stylesheet" href="./css/post.css">
     <link rel="stylesheet" href="./css/user-edit.css">
     <link rel="stylesheet" href="./css/common.css">
 </head>
 
 <body>
-    <div class="ktb-top-banner">
-        <h2>KTB Board</h2>
+    <div class="top-banner">
+        <a class="logo-img" href="posts.html">
+            <img src="/frontend/images/WC26_logo.svg" alt="logo" class="logo-img">
+        </a>
+
+        <h2>2026 FIFA WORLD CUP™</h2>
 
         <div class="profile-container">
             <div class="profile-circle" id="profileCircle">👤</div>
@@ -28,12 +32,12 @@
 
         <div class="edit-profile-section">
             <div class="edit-profile-image-container" id="profileImageContainer">
-                <div class="edit-profile-circle empty" id="editProfileCircle"></div>
+                <div class="edit-profile-circle empty" id="editProfileCircle" title="Click to add profile image"></div>
             </div>
 
             <div class="edit-profile-url-box" id="profileUrlBox">
                 <label for="profileImageUrl">Profile Image URL</label>
-                <input type="text" id="profileImageUrl" name="profileImageUrl">
+                <input type="text" id="profileImageUrl" name="profileImageUrl" placeholder="Enter image URL and press Enter">
             </div>
         </div>
 
@@ -45,7 +49,7 @@
 
             <div class="form-group">
                 <label for="nickname">Nickname</label>
-                <input type="text" id="nickname" required>
+                <input type="text" id="nickname" placeholder="Enter your nickname" required >
                 <div class="error-message" id="nicknameError"></div>
             </div>
 
