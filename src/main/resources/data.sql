@@ -9,10 +9,10 @@ INSERT INTO users (
     password_updated_at,
     deleted_at
 ) VALUES (
-    'denzi@chainsawman.com',
-    'strongman1',
-    'Pochita',
-    NULL,
+    'test@test.com',
+    '$2a$10$Ipk7Xms7kvXN/TgqqO0b7OJNHhbmCrRBSheHDd7CQGC2HlnrzdWJ.', --12345678
+    'test',
+    'https://i.namu.wiki/i/1jdhfuJxvI-RtKFumZD0wggFTdQDOANKk8HVx0Gn57jhUhb-sLhxfUG7cx978fOizT0Lfk6tl15KjbqRKJzoyHZcFsUIT2LXpn0PtnuzHbN38iLVT_ImI2hDQeNf-2BflYeDv7ri2E-YvAZYUdIWSA.svg',
     false,
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP,
@@ -31,10 +31,10 @@ INSERT INTO users (
     password_updated_at,
     deleted_at
 ) VALUES (
-     'reze@janedoe.com',
-     '161616',
-     'Bomb',
-     NULL,
+     'dummy@dummy.com',
+     '$2a$10$XW3uqYz62k1H5ux6n5bdk.317aawij1WtgcZy1b4zxpTYjyx7UZk.', --87654321
+     'dummy',
+     'https://i.namu.wiki/i/0u4CFwTcXGIiHYDFAtKQ_NJZhx7SlcfYpnNWLOOmyVlsxihHNL8kTM1z6DVRy4SSliMrmjBZo0TxVF1tnrYYgVleQFWohaMINce2MQkQe_XsVJoRnMze5suwKt5STaApqs8xrQzshZVHItMqvwdWRg.svg',
      false,
      CURRENT_TIMESTAMP,
      CURRENT_TIMESTAMP,
@@ -58,8 +58,8 @@ INSERT INTO posts (
     hidden_at
 ) VALUES (
     1,
-    'I''m chainsaw man',
-    'Do you know where the Futamichi Cafe is?',
+    'Norway v England | Quarter-final',
+    'There was a match between Norway & England played at Miami Stadium on Sunday 12, July at 06:00 KST.',
     0,
     0,
     0,
@@ -88,8 +88,8 @@ INSERT INTO posts (
     hidden_at
 ) VALUES (
      2,
-     'Looking for a part-timer for the cafe.',
-     'We are looking for the part-timer for the cafe. Please stop by our cafe with your resume.',
+     'Argentina v Switzerland | Quarter-final',
+     'There was a match between Argentina & Switzerland played at Kansas Stadium on Sunday 12, July at 10:00 KST.',
      0,
      0,
      0,
@@ -116,7 +116,7 @@ INSERT INTO comments (
     1,
     2,
     NULL,
-    'Do you mean the cafe close to phone booth?',
+    'Because maybe you''re gonna be the one that saves me.',
     false,
     false,
     CURRENT_TIMESTAMP,
@@ -138,7 +138,29 @@ INSERT INTO comments (
     1,
     1,
     1,
-    'Yes, that''s exactly the one I''m looking for!',
+    'And after all, you''re my wonderwall.',
+    false,
+    false,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP,
+    NULL
+);
+
+INSERT INTO comments (
+    post_id,
+    user_id,
+    parent_comment_id,
+    content,
+    deleted,
+    edited,
+    created_at,
+    updated_at,
+    deleted_at
+) VALUES (
+    2,
+    1,
+    NULL,
+    'VAMOS!!! MESSI!!!',
     false,
     false,
     CURRENT_TIMESTAMP,
@@ -152,6 +174,16 @@ INSERT INTO post_images (
     sort_order
 ) VALUES (
     1,
-    'https://cdn.pixabay.com/photo/2018/10/05/15/45/hard-rock-cafe-3726209_1280.jpg',
+    'https://cdn-media.theathletic.com/cdn-cgi/image/width=1440%2cquality=70%2cformat=auto/https://cdn-media.theathletic.com/FV7FjolqeFqF_qlbnRfjVdCBt_1440x960.jpg',
+    0
+);
+
+INSERT INTO post_images (
+    post_id,
+    image_url,
+    sort_order
+) VALUES (
+    2,
+    'https://cdn-media.theathletic.com/cdn-cgi/image/width=1440%2cquality=70%2cformat=auto/https://cdn-media.theathletic.com/2tI5kiV1ItAO_RCOEDgnyIS25_1440x960.jpg',
     0
 );
