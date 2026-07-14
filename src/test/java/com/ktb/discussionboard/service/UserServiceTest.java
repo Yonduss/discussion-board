@@ -55,15 +55,13 @@ class UserServiceTest {
         // given
         String email = "test@test.com";
 
-        User user = Mockito.mock(User.class);
+        User user = new User();
+        user.setId(1L);
+        user.setEmail(email);
+        user.setNickname("test");
+        user.setProfileImageUrl("https://cdn.pixabay.com/photo/2026/05/12/03/06/03-06-14-37_1280.jpg");
 
         given(userRepository.findByEmailAndDeletedFalse(email)).willReturn(Optional.of(user));
-
-        given(user.getId()).willReturn(1L);
-        given(user.getEmail()).willReturn(email);
-        given(user.getNickname()).willReturn("Test");
-        given(user.getProfileImageUrl())
-                .willReturn("https://cdn.pixabay.com/photo/2026/05/12/03/06/03-06-14-37_1280.jpg");
 
         // when
         UserResponseDto result = userService.getUser(email);

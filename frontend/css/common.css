@@ -5,51 +5,37 @@
 }
 
 body {
-    background: #F4F5F7;
-    min-height: 100vh;
     font-family: Arial, sans-serif;
-    padding-top: 130px;
+    background-color: #f3f3f0;
+    padding-top: 100px;
 }
 
-.ktb-top-banner {
+.logo-img {
+    position: absolute;
+    top: 12px;
+    left: 30px;
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+}
+
+.top-banner {
     width: 100%;
-    height: 104px;
-    border-bottom: 1px solid #000;
+    height: 100px;
+    box-shadow: 0 6px 20px rgba(20, 20, 20, 0.12);
     position: fixed;
     top: 0;
     left: 0;
-    background-color: #F4F5F7;
+    background-color: #f3f3f0;
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 1000;
 }
 
-.ktb-top-banner h2 {
+.top-banner h2 {
     margin: 0;
     font-size: 36px;
-}
-
-.back-button {
-    position: absolute;
-    left: 30px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.4rem;
-    height: 2.4rem;
-    font-size: 1.4rem;
-    text-decoration: none;
-    color: inherit;
-    border: 1px solid transparent;
-    border-radius: 0.35rem;
-    transition: background-color .2s,
-                border-color .2s;
-}
-
-.back-button:hover {
-    background-color: rgba(0,0,0,.05);
-    border-color: rgba(0,0,0,.12);
 }
 
 .profile-container {
@@ -60,18 +46,27 @@ body {
 }
 
 .profile-circle {
-    width: 40px;
-    height: 40px;
+    width: 52px;
+    height: 52px;
     border-radius: 50%;
-    background-color: #95a5a6;
+    background-color: #d5d5cf;
     cursor: pointer;
-    display: flex;
+    overflow: hidden;
+    display: grid;
     align-items: center;
     justify-content: center;
+    border: 1px solid transparent;
+}
+
+.profile-circle img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
 }
 
 .profile-circle:hover {
-    background-color: #7f8c8d;
+    background-color: #9a9a94;
 }
 
 .profile-dropdown {
@@ -79,12 +74,12 @@ body {
     position: absolute;
     top: 50px;
     right: 0;
-    background: white;
-    border: 1px solid #ddd;
+    background: #eeeeea;
+    border: 1px solid #d5d5cf;
     border-radius: 6px;
     min-width: 180px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-    z-index: 1001;
+    box-shadow: 0 2px 8px rgba(20, 20, 20, 0.08);
+    z-index: 2000;
 }
 
 .profile-dropdown.active {
@@ -94,12 +89,12 @@ body {
 .profile-dropdown a {
     display: block;
     padding: 12px 16px;
-    color: #333;
+    color: #1c1c1c;
     text-decoration: none;
 }
 
 .profile-dropdown a:hover {
-    background: #f0f0f0;
+    background: #d5d5cf;
 }
 
 .profile-dropdown a:first-child {
@@ -112,4 +107,11 @@ body {
 
 button {
     cursor: pointer;
+}
+
+.edited-label {
+    margin-left: 6px;
+    color: #9a9a94;
+    font-size: 12px;
+    font-style: italic;
 }

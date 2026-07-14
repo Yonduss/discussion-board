@@ -1,46 +1,57 @@
 .main-container {
-    max-width: 800px;
+    width: min(calc(100% - 32px), 700px);
     margin: 30px auto;
-    padding: 0 20px;
+    position: relative;
 }
 
 .header-section {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 30px;
+    position: sticky;
+    top: 120px;
+    height: 0;
+    z-index: 100;
 }
 
 .create-post-btn {
-    background-color: #3498db;
-    color: white;
-    border: none;
+    position: absolute;
+    left: calc(100% + 20px);
+    background-color: #f8f8f5;
+    color: #1c1c1c;
+    border: 1px solid #1c1c1c;
     padding: 12px 24px;
     border-radius: 4px;
-    font-size: 16px;
+    font-size: 14px;
+    white-space: nowrap;
     cursor: pointer;
     transition: background-color 0.2s;
+    font-weight: bold;
 }
 
 .create-post-btn:hover {
-    background-color: #2980b9;
+    background-color: #1c1c1c;
+    color: #f8f8f5;
+    transform: translateY(-1px);
 }
 
 .posts-list {
     display: flex;
     flex-direction: column;
     gap: 15px;
+    width: 100%;
 }
 
 .post-item {
-    background-color: white;
-    border: 1px solid #ddd;
+    background-color: #fafaf8;
+    border: 1px solid #d5d5cf;
     border-radius: 4px;
     padding: 20px;
+    width: 100%;
+    box-sizing: border-box;
     transition: box-shadow 0.2s;
 }
 
 .post-item:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(20, 20, 20, 0.08);
+    transform: translateY(-1px);
 }
 
 .post-header {
@@ -53,14 +64,10 @@
 .post-title {
     font-size: 18px;
     font-weight: 600;
-    color: #2c3e50;
+    color: #1c1c1c;
     margin-bottom: 8px;
     cursor: pointer;
     transition: color 0.2s;
-}
-
-.post-title:hover {
-    color: #3498db;
 }
 
 .post-author {
@@ -73,13 +80,14 @@
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    background-color: #95a5a6;
+    background-color: #d5d5cf;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
+    color: #f8f8f5;
     font-size: 12px;
     font-weight: bold;
+    border: 1px solid transparent;
 }
 
 .author-circle img {
@@ -91,14 +99,14 @@
 
 .author-info {
     font-size: 13px;
-    color: #7f8c8d;
+    color: #1c1c1c;
 }
 
 .post-stats {
     display: flex;
     gap: 20px;
     font-size: 13px;
-    color: #95a5a6;
+    color: #62625e;
     margin-top: 12px;
 }
 
