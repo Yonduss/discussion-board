@@ -85,7 +85,8 @@ public class UserService {
         refreshTokenRepository.deleteByUser_Id(user.getId());
 
         user.setDeleted(true);
-        user.setNickname("Unknown user");
+        user.setEmail("deleted-user-" + user.getId() + "@deleted.email");
+        user.setNickname("Unknown user " + user.getId());
         user.setProfileImageUrl(null);
         user.setDeletedAt(LocalDateTime.now());
     }
