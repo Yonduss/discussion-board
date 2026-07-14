@@ -90,8 +90,18 @@ class AuthServiceTest {
         SignUpResponseDto response = authService.signUp(request);
 
         // then
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+
+        then(userRepository).should().save(userCaptor.capture());
+
+        User savedUser = userCaptor.getValue();
+
         assertThat(response.getId()).isEqualTo(1L);
         assertThat(response.getEmail()).isEqualTo("test@test.com");
+        assertThat(savedUser.getPassword()).isEqualTo("encodedPassword");
+        assertThat(savedUser.getPassword()).isNotEqualTo("12345678");
+
+        then(passwordEncoder).should().encode("12345678");
     }
 
     @Test
