@@ -1,5 +1,5 @@
 import api, { requireLogin } from "./api.js";
-import { setupProfileDropdown, setupLogout } from "./common.js";
+import { setupProfileDropdown, setupLogout, loadProfileCircle } from "./common.js";
 
 const params = new URLSearchParams(window.location.search);
 const postId = params.get("postId");
@@ -10,37 +10,51 @@ const imageInputs = document.getElementById("imageInputs");
 const addImageButton = document.getElementById("addImageButton");
 const postForm = document.getElementById("postForm");
 
-if (!postId) {
-    alert("Post id is missing.");
-    window.location.href = "posts.html";
-    throw new Error("Post id is missing.");
+async function initializePage() {
+    if (!postId) {
+        alert("Post id is missing.");
+        window.location.href = "posts.html";
+        return;
+    }
+
+    requireLogin();
+
+    setupProfileDropdown();
+    setupLogout();
+
+    try {
+        await loadProfileCircle();
+
+        const [postResult, userResult] = await Promise.all([
+            api.get(`/api/v1/posts/${postId}`),
+            api.get("/api/v1/users")
+        ]);
+
+        const post = postResult.data;
+        const currentUser = userResult.data;
+
+        if (String(post.userId) !== String(currentUser.id)) {
+            alert("You are not allowed to edit this post.");
+            window.location.href = `post-detail.html?postId=${postId}`;
+            return;
+        }
+
+        renderPost(post);
+    } catch (error) {
+        console.error("Initialize post edit page error:", error);
+        alert(error.message || "Failed to load post.");
+
+        window.location.href = `post-detail.html?postId=${postId}`;
+    }
 }
 
-requireLogin();
+initializePage();
 
-setupProfileDropdown();
-setupLogout();
+function renderPost(post) {
+    postTitleInput.value = post.title;
+    postContentInput.value = post.content;
 
-loadPost();
-
-async function loadPost() {
-    try {
-        const result = await api.get(
-            `/api/v1/posts/${postId}`
-        );
-
-        const post = result.data;
-
-        postTitleInput.value = post.title;
-        postTitleInput.readOnly = true;
-
-        postContentInput.value = post.content;
-
-        renderImageInputs(post.postImageUrls || []);
-    } catch (error) {
-        console.error("Load post error:", error);
-        alert(error.message || "Failed to load post.");
-    }
+    renderImageInputs(post.postImageUrls || []);
 }
 
 function renderImageInputs(imageUrls) {
@@ -77,11 +91,16 @@ addImageButton.addEventListener("click", function () {
 postForm.addEventListener("submit", async function (event) {
     event.preventDefault();
 
+    const title = postTitleInput.value.trim();
     const content = postContentInput.value.trim();
-
     const postImageUrls = Array.from(document.querySelectorAll('input[name="images[]"]'))
         .map(input => input.value.trim())
         .filter(url => url.length > 0);
+
+    if (!title) {
+        alert("Title is required.");
+        return;
+    }
 
     if (!content) {
         alert("Content is required.");
@@ -92,6 +111,7 @@ postForm.addEventListener("submit", async function (event) {
         await api.patch(
             `/api/v1/posts/${postId}`,
             {
+                title,
                 content,
                 postImageUrls
             }

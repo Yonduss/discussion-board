@@ -10,6 +10,7 @@ const confirmPasswordInput = document.getElementById("confirmPassword");
 const passwordMatchIndicator = document.getElementById("passwordMatch");
 
 const signupForm = document.getElementById("signupForm");
+const signupButton = signupForm.querySelector('button[type="submit"]');
 const loginBtn = document.getElementById("loginBtn");
 
 profileImageContainer.addEventListener("click", function () {
@@ -86,9 +87,6 @@ signupForm.addEventListener("submit", async function (e) {
     }
 
     if (password !== passwordConfirm) {
-        passwordMatchIndicator.classList.remove("match");
-        passwordMatchIndicator.classList.add("nomatch");
-        passwordMatchIndicator.textContent = "✗ Passwords do not match";
         isValid = false;
     }
 
@@ -105,6 +103,9 @@ signupForm.addEventListener("submit", async function (e) {
     }
 
     try {
+        signupButton.disabled = true;
+        signupButton.textContent = "Signing up...";
+
         await api.post(
             "/api/v1/users/signup",
             {
@@ -124,6 +125,9 @@ signupForm.addEventListener("submit", async function (e) {
     } catch (error) {
         console.error("Sign up error:", error);
         alert(error.message || "Server connection failed.");
+    } finally {
+        signupButton.disabled = false;
+        signupButton.textContent = "Sign Up";
     }
 });
 

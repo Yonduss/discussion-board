@@ -1,5 +1,5 @@
 import api, { requireLogin } from "./api.js";
-import { setupProfileDropdown, setupLogout } from "./common.js";
+import { setupProfileDropdown, setupLogout, loadProfileCircle } from "./common.js";
 
 const profileImageContainer = document.getElementById("profileImageContainer");
 const profileUrlBox = document.getElementById("profileUrlBox");
@@ -11,11 +11,14 @@ const nicknameInput = document.getElementById("nickname");
 const userEditForm = document.getElementById("userEditForm");
 const deleteAccountBtn = document.getElementById("deleteAccountBtn");
 
+//need to check current user has permission to edit this profile before rendering this page
 
 requireLogin();
 
 setupProfileDropdown();
 setupLogout();
+
+await loadProfileCircle();
 
 profileImageContainer.addEventListener("click", function () {
     profileUrlBox.classList.toggle("show");

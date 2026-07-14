@@ -1,10 +1,12 @@
 import api, { requireLogin } from "./api.js";
-import { setupProfileDropdown, setupLogout } from "./common.js";
+import { setupProfileDropdown, setupLogout, loadProfileCircle } from "./common.js";
 
 requireLogin();
 
 setupProfileDropdown();
 setupLogout();
+
+await loadProfileCircle();
 
 document.getElementById("addImageButton").addEventListener("click", function () {
     const imageInputs = document.getElementById("imageInputs");
@@ -15,7 +17,7 @@ document.getElementById("addImageButton").addEventListener("click", function () 
     const input = document.createElement("input");
     input.type = "url";
     input.name = "images[]";
-    input.placeholder = "Image URL";
+    input.placeholder = "Enter Image URL";
 
     row.appendChild(input);
     imageInputs.appendChild(row);

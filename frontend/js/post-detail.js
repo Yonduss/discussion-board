@@ -1,5 +1,6 @@
 import api, { requireLogin, formatDate } from "./api.js";
-import { setupProfileDropdown, setupLogout } from "./common.js";
+import {setupProfileDropdown, setupLogout, loadProfileCircle } from "./common.js";
+import { setupComments } from "./comments.js";
 
 const params = new URLSearchParams(window.location.search);
 const postId = params.get("postId");
@@ -7,86 +8,87 @@ const postId = params.get("postId");
 const editPostButton = document.getElementById("editPostButton");
 const deletePostButton = document.getElementById("deletePostButton");
 const likeButton = document.getElementById("likeButton");
+const reportButton = document.getElementById("reportButton");
 
-const commentInput = document.getElementById("commentInput");
-const addCommentButton = document.getElementById("addCommentButton");
-const commentList = document.getElementById("commentList");
+let currentUser = null;
 
-if (!postId) {
-    alert("Post id is missing.");
-    window.location.href = "posts.html";
-    throw new Error("Post id is missing.");
-}
+async function initializePage() {
+    if (!postId) {
+        alert("Post id is missing.");
+        window.location.href = "posts.html";
+        return;
+    }
 
-requireLogin();
+    requireLogin();
 
-setupProfileDropdown();
-setupLogout();
+    setupProfileDropdown();
+    setupLogout();
 
-loadPostDetail();
-loadComments();
-
-async function loadPostDetail() {
     try {
-        const result = await api.get(
-            `/api/v1/posts/${postId}`
-        );
+        const currentUserResult = await api.get("/api/v1/users");
+        currentUser = currentUserResult.data;
 
-        const post = result.data;
+        await loadProfileCircle();
 
-        document.getElementById("postTitle").textContent = post.title;
-        document.getElementById("postContent").textContent = post.content;
-        document.getElementById("authorName").textContent = post.nickname;
-        document.getElementById("postTime").textContent = formatDate(post.createdAt);
-        document.getElementById("likeCount").textContent = post.likeCount;
-        document.getElementById("viewCount").textContent = `Views: ${post.viewCount}`;
-        document.getElementById("commentCount").textContent = `Comments: ${post.commentCount}`;
-
-        renderPostImages(post.postImageUrls || []);
+        await Promise.all([
+            loadPostDetail(),
+            setupComments({
+                postId,
+                currentUser
+            })
+        ]);
     } catch (error) {
-        console.error("Post detail fetch error:", error);
-        alert(error.message || "Failed to load post.");
+        console.error("Page loading error:", error);
+        alert(error.message || "Failed to load the page.");
         window.location.href = "posts.html";
     }
 }
 
-async function loadComments() {
-    try {
-        const result = await api.get(
-            `/api/v1/posts/${postId}/comments`
-        );
+initializePage();
 
-        renderComments(result.data.comments);
-    } catch (error) {
-        console.error("Comments fetch error:", error);
-        alert(error.message || "Failed to load comments.");
+async function loadPostDetail() {
+    const result = await api.get(`/api/v1/posts/${postId}`);
+    const post = result.data;
+
+    const isAuthor = currentUser.id === post.userId;
+    const postActions = document.getElementById("postActions");
+    const authorCircle = document.getElementById("authorCircle");
+    const postTitle = document.getElementById("postTitle");
+
+    postActions.hidden = !isAuthor;
+    postTitle.textContent = post.title;
+
+    document.getElementById("postContent").textContent = post.content;
+    document.getElementById("authorName").textContent = post.nickname;
+
+    if (post.edited) {
+        const editedLabel = document.createElement("span");
+
+        editedLabel.className = "edited-label";
+        editedLabel.textContent = " (edited)";
+
+        postTitle.appendChild(editedLabel);
     }
-}
 
-function renderComments(comments) {
-    commentList.innerHTML = "";
+    authorCircle.replaceChildren();
 
-    comments.forEach(comment => {
-        const commentItem = document.createElement("div");
-        commentItem.className = "comment-item";
+    if (post.profileImageUrl) {
+        authorCircle.innerHTML =
+            `<img src="${post.profileImageUrl}" alt="profile">`;
+    } else {
+        authorCircle.textContent =
+            post.nickname.charAt(0).toUpperCase();
+    }
 
-        commentItem.innerHTML = `
-            <div class="comment-header">
-                <div class="comment-author-circle">👤</div>
-                <div class="comment-author-info">
-                    <div class="comment-author-name">${comment.nickname}</div>
-                    <div class="comment-time">${formatDate(comment.createdAt)}</div>
-                </div>
-                <div class="comment-actions">
-                    <button class="edit-comment-button" data-comment-id="${comment.id}">Edit</button>
-                    <button class="delete-comment-button" data-comment-id="${comment.id}">Delete</button>
-                </div>
-            </div>
-            <div class="comment-body">${comment.content}</div>
-        `;
+    const displayedTime = post.edited && post.updatedAt
+                        ? post.updatedAt
+                        : post.createdAt;
 
-        commentList.appendChild(commentItem);
-    });
+    document.getElementById("postTime").textContent = formatDate(displayedTime);
+    document.getElementById("likeCount").textContent = post.likeCount;
+    document.getElementById("viewCount").textContent = `Views: ${post.viewCount}`;
+
+    renderPostImages(post.postImageUrls || []);
 }
 
 function renderPostImages(imageUrls) {
@@ -95,6 +97,7 @@ function renderPostImages(imageUrls) {
 
     imageUrls.forEach(url => {
         const img = document.createElement("img");
+
         img.src = url;
         img.alt = "Post image";
         img.className = "post-image";
@@ -135,99 +138,29 @@ likeButton.addEventListener("click", async function () {
         console.error("Like error:", error);
         alert(error.message || "Failed to like post.");
     }
-
 });
 
-addCommentButton.addEventListener("click", async function () {
-    const content = commentInput.value.trim();
+reportButton.addEventListener("click", async function () {
+    const reason = prompt(
+        "Please enter the reason for reporting this post."
+    );
 
-    if (!content) {
-        alert("Please enter a comment.");
+    if (!reason || !reason.trim()) {
         return;
     }
 
     try {
         await api.post(
-            `/api/v1/posts/${postId}/comments`,
+            `/api/v1/posts/${postId}/reports`,
             {
-                content
+                reason: reason.trim()
             }
         );
 
-        commentInput.value = "";
-
-        await loadComments();
-        await loadPostDetail();
+        alert("Post reported successfully.");
+        window.location.href = "posts.html";
     } catch (error) {
-        console.error("Adding comment error:", error);
-        alert(error.message || "Failed to add a comment.");
+        console.error("Report post error:", error);
+        alert(error.message || "Failed to report post.");
     }
-});
-
-commentList.addEventListener("click", async function (event) {
-    const editButton = event.target.closest(".edit-comment-button");
-    const deleteButton = event.target.closest(".delete-comment-button");
-
-    if (editButton) {
-        const commentId = editButton.dataset.commentId;
-
-        const currentContent = editButton
-            .closest(".comment-item")
-            .querySelector(".comment-body")
-            .textContent
-            .trim();
-
-        const newContent = prompt("Edit comment:", currentContent);
-
-        if (!newContent || !newContent.trim()) {
-            return;
-        }
-
-        await updateComment(commentId, newContent.trim());
-    }
-
-    if (deleteButton) {
-        const commentId = deleteButton.dataset.commentId;
-
-        if (!confirm("Delete this comment?")) return;
-
-        await deleteComment(commentId);
-    }
-});
-
-async function updateComment(commentId, content) {
-    try {
-        await api.patch(
-            `/api/v1/posts/${postId}/comments/${commentId}`,
-            {
-                content
-            }
-        );
-
-        await loadComments();
-    } catch (error) {
-        console.error("Update comment error:", error);
-        alert(error.message || "Failed to update comment.");
-    }
-}
-
-async function deleteComment(commentId) {
-    try {
-        await api.delete(
-            `/api/v1/posts/${postId}/comments/${commentId}`
-        );
-
-        await loadComments();
-        await loadPostDetail();
-    } catch (error) {
-        console.error("Delete comment error:", error);
-        alert(error.message || "Failed to delete comment.");
-    }
-}
-
-const backButton = document.getElementById("backButton");
-
-backButton.addEventListener("click", function (event) {
-    event.preventDefault();
-    history.back();
 });

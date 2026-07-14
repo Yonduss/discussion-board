@@ -9,6 +9,11 @@ loginForm.addEventListener("submit", async function (event) {
     const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value.trim();
 
+    if (!email || !password) {
+        alert("Please enter a valid email and password.");
+        return;
+    }
+
     try {
         const result = await api.post(
             "/api/v1/auth/login",
@@ -21,8 +26,6 @@ loginForm.addEventListener("submit", async function (event) {
             }
         );
 
-        console.log("Login success:", result);
-
         localStorage.setItem("loginUserEmail", result.data.email);
         localStorage.setItem("accessToken", result.data.accessToken);
 
@@ -30,7 +33,13 @@ loginForm.addEventListener("submit", async function (event) {
 
     } catch (error) {
         console.error("Login error:", error);
-        alert(error.message || "Server connection failed.");
+
+        if (error.status === 401) {
+            alert("Email or password is incorrect.");
+            return;
+        }
+
+        alert(error.message || "Login failed.");
     }
 });
 

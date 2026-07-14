@@ -1,3 +1,23 @@
+import api from "./api.js";
+
+export async function loadProfileCircle() {
+    try {
+        const result = await api.get("/api/v1/users");
+        const user = result.data;
+        const profileCircle = document.getElementById("profileCircle");
+
+        if (user.profileImageUrl) {
+            profileCircle.innerHTML =
+                `<img src="${user.profileImageUrl}" alt="profile">`;
+        } else {
+            profileCircle.textContent =
+                user.nickname.charAt(0).toUpperCase();
+        }
+    } catch (error) {
+        console.error("Failed to load profile image:", error);
+    }
+}
+
 export function setupProfileDropdown() {
     const profileCircle = document.getElementById("profileCircle");
     const profileDropdown = document.getElementById("profileDropdown");

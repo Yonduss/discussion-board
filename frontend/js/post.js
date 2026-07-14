@@ -1,10 +1,12 @@
 import api, { requireLogin, formatDate } from "./api.js";
-import { setupProfileDropdown, setupLogout } from "./common.js";
+import { setupProfileDropdown, setupLogout, loadProfileCircle } from "./common.js";
 
 requireLogin();
 
 setupProfileDropdown();
 setupLogout();
+
+await loadProfileCircle();
 
 const createPostButton = document.getElementById("createPostButton");
 
@@ -19,10 +21,9 @@ let isLoading = false;
 
 const postsList = document.getElementById("postsList");
 
-document.addEventListener("DOMContentLoaded", function () {
-    postsList.innerHTML = "";
-    loadPosts();
-});
+postsList.innerHTML = "";
+
+loadPosts();
 
 async function loadPosts() {
     if (!hasNext || isLoading) {
@@ -53,12 +54,16 @@ async function loadPosts() {
 function renderPosts(posts) {
     posts.forEach(post => {
         const postItem = document.createElement("div");
+        const editedLabel = post.edited
+            ? `<span class="edited-label"> (edited)</span>`
+            : "";
+
         postItem.className = "post-item";
 
         postItem.innerHTML = `
             <div class="post-header">
                 <div class="post-title" data-post-id="${post.id}">
-                    ${post.title}
+                    ${post.title}${editedLabel}
                 </div>
             </div>
 
@@ -80,13 +85,25 @@ function renderPosts(posts) {
             </div>
         `;
 
-        postItem.querySelector(".post-title").addEventListener("click", function () {
-            window.location.href = `post-detail.html?postId=${post.id}`;
-        });
+        //postItem.querySelector(".post-title").addEventListener("click", function () {
+        //    window.location.href = `post-detail.html?postId=${post.id}`;
+        //});
 
         postsList.appendChild(postItem);
     });
 }
+
+postsList.addEventListener("click", function (event) {
+    const postTitle = event.target.closest(".post-title");
+
+    if (!postTitle) {
+        return;
+    }
+
+    const postId = postTitle.dataset.postId;
+
+    window.location.href = `post-detail.html?postId=${postId}`;
+});
 
 window.addEventListener("scroll", function () {
     const scrollTop = window.scrollY;

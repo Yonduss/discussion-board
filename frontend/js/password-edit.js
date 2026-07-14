@@ -1,15 +1,41 @@
 import api, { requireLogin } from "./api.js";
-import { setupProfileDropdown, setupLogout } from "./common.js";
+import {setupProfileDropdown, setupLogout, loadProfileCircle } from "./common.js";
 
 const passwordEditForm = document.getElementById("passwordEditForm");
 const currentPasswordInput = document.getElementById("currentPassword");
 const newPasswordInput = document.getElementById("newPassword");
 const confirmPasswordInput = document.getElementById("confirmPassword");
+const passwordMatchIndicator = document.getElementById("passwordMatch");
+
+//need to check current user has permission to edit this profile before rendering this page
 
 requireLogin();
 
 setupProfileDropdown();
 setupLogout();
+
+await loadProfileCircle();
+
+function checkPasswordMatch() {
+    if (confirmPasswordInput.value === "") {
+        passwordMatchIndicator.classList.remove("match", "nomatch");
+        passwordMatchIndicator.textContent = "";
+        return;
+    }
+
+    if (newPasswordInput.value === confirmPasswordInput.value) {
+        passwordMatchIndicator.classList.remove("nomatch");
+        passwordMatchIndicator.classList.add("match");
+        passwordMatchIndicator.textContent = "✓ Passwords match";
+    } else {
+        passwordMatchIndicator.classList.remove("match");
+        passwordMatchIndicator.classList.add("nomatch");
+        passwordMatchIndicator.textContent = "✗ Passwords do not match";
+    }
+}
+
+newPasswordInput.addEventListener("input", checkPasswordMatch);
+confirmPasswordInput.addEventListener("input", checkPasswordMatch);
 
 passwordEditForm.addEventListener("submit", async function (event) {
     event.preventDefault();
