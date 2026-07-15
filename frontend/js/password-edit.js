@@ -1,5 +1,5 @@
 import api, { requireLogin } from "./api.js";
-import {setupProfileDropdown, setupLogout, loadProfileCircle } from "./common.js";
+import { setupProfileDropdown, setupLogout, loadProfileCircle } from "./common.js";
 
 const passwordEditForm = document.getElementById("passwordEditForm");
 const currentPasswordInput = document.getElementById("currentPassword");
@@ -38,17 +38,12 @@ confirmPasswordInput.addEventListener("input", checkPasswordMatch);
 passwordEditForm.addEventListener("submit", async function (event) {
     event.preventDefault();
 
-    const currentPassword = currentPasswordInput.value.trim();
-    const newPassword = newPasswordInput.value.trim();
-    const newPasswordConfirm = confirmPasswordInput.value.trim();
+    const currentPassword = currentPasswordInput.value;
+    const newPassword = newPasswordInput.value;
+    const newPasswordConfirm = confirmPasswordInput.value;
 
     if (!currentPassword || !newPassword || !newPasswordConfirm) {
         alert("All fields are required to change your password.");
-        return;
-    }
-
-    if (currentPassword === newPassword) {
-        alert("New password is same as old password.");
         return;
     }
 
@@ -57,15 +52,20 @@ passwordEditForm.addEventListener("submit", async function (event) {
         return;
     }
 
-    await api.patch(
-        `/api/v1/users/password`,
-        {
-            currentPassword,
-            newPassword,
-            newPasswordConfirm
-        }
-    );
+    try {
+        await api.patch(
+            `/api/v1/users/password`,
+            {
+                currentPassword,
+                newPassword,
+                newPasswordConfirm
+            }
+        );
 
-    alert("Password changed successfully.");
-    window.location.href = "posts.html";
+        alert("Password changed successfully.");
+        window.location.href = "posts.html";
+    } catch (error) {
+        console.error("Password change error:", error);
+        alert(error.message || "Failed to change password.");
+    }
 });
