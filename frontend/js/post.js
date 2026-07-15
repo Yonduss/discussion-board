@@ -85,10 +85,6 @@ function renderPosts(posts) {
             </div>
         `;
 
-        //postItem.querySelector(".post-title").addEventListener("click", function () {
-        //    window.location.href = `post-detail.html?postId=${post.id}`;
-        //});
-
         postsList.appendChild(postItem);
     });
 }

@@ -7,8 +7,6 @@ const newPasswordInput = document.getElementById("newPassword");
 const confirmPasswordInput = document.getElementById("confirmPassword");
 const passwordMatchIndicator = document.getElementById("passwordMatch");
 
-//need to check current user has permission to edit this profile before rendering this page
-
 requireLogin();
 
 setupProfileDropdown();
