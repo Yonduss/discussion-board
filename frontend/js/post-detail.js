@@ -1,5 +1,5 @@
 import api, { requireLogin, formatDate } from "./api.js";
-import {setupProfileDropdown, setupLogout, loadProfileCircle } from "./common.js";
+import { setupProfileDropdown, setupLogout, loadProfileCircle } from "./common.js";
 import { setupComments } from "./comments.js";
 
 const params = new URLSearchParams(window.location.search);

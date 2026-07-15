@@ -11,8 +11,6 @@ const nicknameInput = document.getElementById("nickname");
 const userEditForm = document.getElementById("userEditForm");
 const deleteAccountBtn = document.getElementById("deleteAccountBtn");
 
-//need to check current user has permission to edit this profile before rendering this page
-
 requireLogin();
 
 setupProfileDropdown();
