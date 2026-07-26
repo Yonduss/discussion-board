@@ -67,11 +67,10 @@ class UserServiceTest {
         UserResponseDto result = userService.getUser(email);
 
         // then
-        assertThat(result.getId()).isEqualTo(1L);
-        assertThat(result.getEmail()).isEqualTo(email);
-        assertThat(result.getNickname()).isEqualTo("Test");
-        assertThat(result.getProfileImageUrl())
-                .isEqualTo("https://cdn.pixabay.com/photo/2026/05/12/03/06/03-06-14-37_1280.jpg");
+        assertThat(result.getId()).isEqualTo(user.getId());
+        assertThat(result.getEmail()).isEqualTo(user.getEmail());
+        assertThat(result.getNickname()).isEqualTo(user.getNickname());
+        assertThat(result.getProfileImageUrl()).isEqualTo(user.getProfileImageUrl());
     }
 
     @Test
@@ -282,7 +281,7 @@ class UserServiceTest {
         then(refreshTokenRepository).should().deleteByUser_Id(user.getId());
 
         assertThat(user.isDeleted()).isTrue();
-        assertThat(user.getNickname()).isEqualTo("Unknown user");
+        assertThat(user.getNickname()).isEqualTo("Unknown user " + user.getId());
         assertThat(user.getProfileImageUrl()).isNull();
         assertThat(user.getDeletedAt()).isNotNull();
     }

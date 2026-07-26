@@ -181,7 +181,7 @@ class AuthServiceTest {
         given(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .willReturn(authentication);
 
-        given(userRepository.findByEmail("test@test.com")).willReturn(Optional.of(user));
+        given(userRepository.findByEmailAndDeletedFalse("test@test.com")).willReturn(Optional.of(user));
 
         given(jwtTokenProvider.generateAccessToken("test@test.com")).willReturn("access-token");
         given(jwtTokenProvider.generateRefreshToken("test@test.com")).willReturn("refresh-token");
@@ -239,7 +239,7 @@ class AuthServiceTest {
         given(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .willReturn(authentication);
 
-        given(userRepository.findByEmail("test@test.com")).willReturn(Optional.of(user));
+        given(userRepository.findByEmailAndDeletedFalse("test@test.com")).willReturn(Optional.of(user));
 
         given(jwtTokenProvider.generateAccessToken("test@test.com")).willReturn("access-token");
         given(jwtTokenProvider.generateRefreshToken("test@test.com")).willReturn("refresh-token");
