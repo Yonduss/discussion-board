@@ -23,6 +23,8 @@ public enum ErrorCode {
 
     VALIDATION_FAILED("Validation is failed", HttpStatus.BAD_REQUEST),
 
+    NESTED_REPLY_NOT_ALLOWED("Nested replies are not allowed", HttpStatus.BAD_REQUEST),
+
     UNAUTHORIZED("Unauthorized access", HttpStatus.UNAUTHORIZED),
 
     INVALID_EMAIL_OR_PASSWORD("Invalid email or password", HttpStatus.UNAUTHORIZED),

@@ -48,6 +48,10 @@ public class CommentService {
             if (!parentComment.getPost().getId().equals(postId)) {
                 throw new BusinessException(ErrorCode.COMMENT_NOT_FOUND);
             }
+
+            if (parentComment.getParentComment() != null) {
+                throw new BusinessException(ErrorCode.NESTED_REPLY_NOT_ALLOWED);
+            }
         }
 
         Comment comment = new Comment(
