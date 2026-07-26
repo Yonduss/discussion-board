@@ -226,7 +226,7 @@ public class PostService {
 
         User user = post.getUser();
 
-        int commentCount = commentRepository.countByPost_Id(post.getId());
+        int commentCount = commentRepository.countByPost_IdAndDeletedFalse(post.getId());
 
         return new PostResponseDto(
                 post.getId(),

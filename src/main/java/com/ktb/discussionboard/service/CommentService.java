@@ -42,7 +42,7 @@ public class CommentService {
         Comment parentComment = null;
 
         if (request.getParentCommentId() != null) {
-            parentComment = commentRepository.findByIdAndDeletedFalse(request.getParentCommentId())
+            parentComment = commentRepository.findById(request.getParentCommentId())
                     .orElseThrow(() -> new BusinessException(ErrorCode.COMMENT_NOT_FOUND));
 
             if (!parentComment.getPost().getId().equals(postId)) {
