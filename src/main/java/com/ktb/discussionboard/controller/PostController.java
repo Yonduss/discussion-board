@@ -33,9 +33,12 @@ public class PostController {
 
     @GetMapping("/{postId}")
     public ResponseEntity<ApiResponse<PostResponseDto>> getPost(
+            Authentication authentication,
             @PathVariable Long postId) {
 
-        PostResponseDto response = postService.getPost(postId);
+        String email = authentication.getName();
+
+        PostResponseDto response = postService.getPost(email, postId);
 
         return ResponseEntity.ok(
                 ApiResponse.of("Post found successfully", response));
@@ -43,9 +46,13 @@ public class PostController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<PostPageResponseDto>> getPosts(
+            Authentication authentication,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        PostPageResponseDto response = postService.getPosts(page, size);
+
+        String email = authentication.getName();
+
+        PostPageResponseDto response = postService.getPosts(email, page, size);
 
         return ResponseEntity.ok(
                 ApiResponse.of("Posts found successfully", response));
@@ -76,6 +83,19 @@ public class PostController {
 
         return ResponseEntity.ok(
                 ApiResponse.of("Post liked successfully", null));
+    }
+
+    @DeleteMapping("/{postId}/likes")
+    public ResponseEntity<ApiResponse<Void>> unlikePost(
+            Authentication authentication,
+            @PathVariable Long postId) {
+
+        String email = authentication.getName();
+
+        postService.unlikePost(email, postId);
+
+        return ResponseEntity.ok(
+                ApiResponse.of("Post unliked successfully", null));
     }
 
     @PostMapping("/{postId}/reports")

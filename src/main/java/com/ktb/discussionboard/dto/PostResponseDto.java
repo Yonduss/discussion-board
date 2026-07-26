@@ -17,6 +17,7 @@ public class PostResponseDto {
     private String content;
     private List<String> postImageUrls;
     private int likeCount;
+    private boolean liked;
     private int viewCount;
     private int commentCount;
     private boolean edited;

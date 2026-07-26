@@ -65,29 +65,30 @@ public class PostService {
             }
         }
 
-        return toPostResponseDto(savedPost);
+        return toPostResponseDto(savedPost, email);
     }
 
     @Transactional
-    public PostResponseDto getPost(Long postId) {
+    public PostResponseDto getPost(String email, Long postId) {
         Post post = postRepository.findByIdAndDeletedFalseAndHiddenFalse(postId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
 
         post.setViewCount(post.getViewCount() + 1);
 
-        return toPostResponseDto(post);
+        return toPostResponseDto(post, email);
     }
 
     @Transactional(readOnly = true)
-    public PostPageResponseDto getPosts(int page, int size) {
+    public PostPageResponseDto getPosts(String email, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
         Page<Post> postPage = postRepository
                 .findAllByDeletedFalseAndHiddenFalseOrderByCreatedAtDesc(pageable);
 
-        List<PostResponseDto> posts = postPage.getContent().stream()
-                .map(this::toPostResponseDto)
-                .toList();
+        List<PostResponseDto> posts = postPage.getContent()
+                        .stream()
+                        .map(post -> toPostResponseDto(post, email))
+                        .toList();
 
         return new PostPageResponseDto(
                 postPage.getNumber(),
@@ -137,7 +138,7 @@ public class PostService {
         post.setEdited(true);
         post.setUpdatedAt(LocalDateTime.now());
 
-        return toPostResponseDto(post);
+        return toPostResponseDto(post, email);
     }
 
     @Transactional
@@ -166,25 +167,35 @@ public class PostService {
     @Transactional
     public void likePost(String email, Long postId) {
         User user = userRepository.findByEmailAndDeletedFalse(email)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+                        .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         Post post = postRepository.findByIdAndDeletedFalseAndHiddenFalse(postId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
+                        .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
 
-        if (postLikeRepository.existsByUser_IdAndPost_Id(user.getId(), postId)) {
+        if(postLikeRepository.existsByUser_IdAndPost_Id(user.getId(), postId)) {
             throw new BusinessException(ErrorCode.POST_ALREADY_LIKED);
         }
 
         PostLike postLike = new PostLike(
-                null,
-                user,
-                post,
-                LocalDateTime.now()
-        );
+                        null,
+                        user,
+                        post,
+                        LocalDateTime.now());
 
         postLikeRepository.save(postLike);
+        postRepository.increaseLikeCount(postId);
+    }
 
-        post.setLikeCount(post.getLikeCount() + 1);
+    @Transactional
+    public void unlikePost(String email, Long postId){
+        User user = userRepository.findByEmailAndDeletedFalse(email)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        PostLike postLike = postLikeRepository.findByUser_IdAndPost_Id(user.getId(), postId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_LIKED));
+
+        postLikeRepository.delete(postLike);
+        postRepository.decreaseLikeCount(postId);
     }
 
     @Transactional
@@ -217,16 +228,21 @@ public class PostService {
         }
     }
 
-    private PostResponseDto toPostResponseDto(Post post) {
+    private PostResponseDto toPostResponseDto(Post post, String email) {
         List<String> postImageUrls = postImageRepository
-                .findAllByPost_IdOrderBySortOrderAsc(post.getId())
-                .stream()
-                .map(PostImage::getImageUrl)
-                .toList();
+                        .findAllByPost_IdOrderBySortOrderAsc(post.getId())
+                        .stream()
+                        .map(PostImage::getImageUrl)
+                        .toList();
 
         User user = post.getUser();
 
+        User currentUser = userRepository.findByEmailAndDeletedFalse(email)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
         int commentCount = commentRepository.countByPost_IdAndDeletedFalse(post.getId());
+
+        boolean liked = postLikeRepository.existsByUser_IdAndPost_Id(currentUser.getId(), post.getId());
 
         return new PostResponseDto(
                 post.getId(),
@@ -237,6 +253,7 @@ public class PostService {
                 post.getContent(),
                 postImageUrls,
                 post.getLikeCount(),
+                liked,
                 post.getViewCount(),
                 commentCount,
                 post.isEdited(),

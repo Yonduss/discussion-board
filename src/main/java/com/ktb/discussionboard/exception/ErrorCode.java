@@ -13,6 +13,8 @@ public enum ErrorCode {
 
     POST_ALREADY_LIKED("Post is already liked", HttpStatus.CONFLICT),
 
+    POST_NOT_LIKED("Post is not liked yet", HttpStatus.CONFLICT),
+
     POST_ALREADY_REPORTED("Post is already reported", HttpStatus.CONFLICT),
 
     PASSWORD_MISMATCH("Passwords do not match", HttpStatus.BAD_REQUEST),
