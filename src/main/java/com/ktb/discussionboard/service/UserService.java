@@ -46,10 +46,8 @@ public class UserService {
             user.setProfileUpdatedAt(LocalDateTime.now());
         }
 
-        if (request.getProfileImageUrl() != null) {
-            user.setProfileImageUrl(request.getProfileImageUrl());
-            user.setProfileUpdatedAt(LocalDateTime.now());
-        }
+        user.setProfileImageUrl(request.getProfileImageUrl());
+        user.setProfileUpdatedAt(LocalDateTime.now());
 
         return toUserResponseDto(user);
     }
