@@ -14,6 +14,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import static java.time.LocalDateTime.*;
 
@@ -105,6 +106,7 @@ public class AuthService {
         );
     }
 
+    @Transactional
     public TokenReissueResponseDto reissue(TokenReissueRequestDto request) {
         String refreshTokenValue = request.getRefreshToken();
 
