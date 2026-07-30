@@ -1,10 +1,7 @@
 package com.ktb.discussionboard.service;
 
 import com.ktb.discussionboard.domain.*;
-import com.ktb.discussionboard.dto.CreatePostRequestDto;
-import com.ktb.discussionboard.dto.PostPageResponseDto;
-import com.ktb.discussionboard.dto.PostResponseDto;
-import com.ktb.discussionboard.dto.UpdatePostRequestDto;
+import com.ktb.discussionboard.dto.*;
 import com.ktb.discussionboard.exception.BusinessException;
 import com.ktb.discussionboard.exception.ErrorCode;
 import com.ktb.discussionboard.repository.*;
@@ -65,7 +62,7 @@ public class PostService {
             }
         }
 
-        return toPostResponseDto(savedPost, email);
+        return toPostResponseDto(savedPost, user);
     }
 
     @Transactional
@@ -73,21 +70,32 @@ public class PostService {
         Post post = postRepository.findByIdAndDeletedFalseAndHiddenFalse(postId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
 
+        User currentUser = userRepository.findByEmailAndDeletedFalse(email)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
         post.setViewCount(post.getViewCount() + 1);
 
-        return toPostResponseDto(post, email);
+        return toPostResponseDto(post, currentUser);
     }
 
     @Transactional(readOnly = true)
-    public PostPageResponseDto getPosts(String email, int page, int size) {
+    public PostPageResponseDto getPosts(String email, int page, int size, String keyword) {
+        User currentUser = userRepository.findByEmailAndDeletedFalse(email)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<Post> postPage = postRepository
-                .findAllByDeletedFalseAndHiddenFalseOrderByCreatedAtDesc(pageable);
+        Page<Post> postPage;
+
+        if (keyword == null || keyword.isBlank()) {
+            postPage = postRepository.findAllByDeletedFalseAndHiddenFalseOrderByCreatedAtDesc(pageable);
+        } else {
+            postPage = postRepository.searchPosts(keyword.trim(), pageable);
+        }
 
         List<PostResponseDto> posts = postPage.getContent()
                         .stream()
-                        .map(post -> toPostResponseDto(post, email))
+                        .map(post -> toPostResponseDto(post, currentUser))
                         .toList();
 
         return new PostPageResponseDto(
@@ -138,7 +146,7 @@ public class PostService {
         post.setEdited(true);
         post.setUpdatedAt(LocalDateTime.now());
 
-        return toPostResponseDto(post, email);
+        return toPostResponseDto(post, user);
     }
 
     @Transactional
@@ -165,7 +173,7 @@ public class PostService {
     }
 
     @Transactional
-    public void likePost(String email, Long postId) {
+    public PostLikeResponseDto likePost(String email, Long postId) {
         User user = userRepository.findByEmailAndDeletedFalse(email)
                         .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
@@ -183,19 +191,38 @@ public class PostService {
                         LocalDateTime.now());
 
         postLikeRepository.save(postLike);
+
+        int updatedLikeCount = post.getLikeCount() + 1;
+
         postRepository.increaseLikeCount(postId);
+
+        return new PostLikeResponseDto(
+                updatedLikeCount,
+                true
+        );
     }
 
     @Transactional
-    public void unlikePost(String email, Long postId){
+    public PostLikeResponseDto unlikePost(String email, Long postId){
         User user = userRepository.findByEmailAndDeletedFalse(email)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        Post post = postRepository.findByIdAndDeletedFalseAndHiddenFalse(postId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
 
         PostLike postLike = postLikeRepository.findByUser_IdAndPost_Id(user.getId(), postId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_LIKED));
 
         postLikeRepository.delete(postLike);
+
+        int updatedLikeCount = Math.max(post.getLikeCount() - 1, 0);
+
         postRepository.decreaseLikeCount(postId);
+
+        return new PostLikeResponseDto(
+                updatedLikeCount,
+                false
+        );
     }
 
     @Transactional
@@ -228,7 +255,7 @@ public class PostService {
         }
     }
 
-    private PostResponseDto toPostResponseDto(Post post, String email) {
+    private PostResponseDto toPostResponseDto(Post post, User currentUser) {
         List<String> postImageUrls = postImageRepository
                         .findAllByPost_IdOrderBySortOrderAsc(post.getId())
                         .stream()
@@ -236,9 +263,6 @@ public class PostService {
                         .toList();
 
         User user = post.getUser();
-
-        User currentUser = userRepository.findByEmailAndDeletedFalse(email)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         int commentCount = commentRepository.countByPost_IdAndDeletedFalse(post.getId());
 
