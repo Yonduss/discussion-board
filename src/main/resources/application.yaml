@@ -9,14 +9,16 @@ spring:
     console:
       enabled: true
       path: /h2-console
+      settings:
+        web-allow-others: false
 
   jpa:
     hibernate:
       ddl-auto: create
-    show-sql: true
+    show-sql: false
     defer-datasource-initialization: true
 
 jwt:
-  secret: "my-secret-key-my-secret-key-my-secret-key-123456"
+  secret: ${JWT_SECRET}
   access-token-expiration: 3600000
   refresh-token-expiration: 1209600000

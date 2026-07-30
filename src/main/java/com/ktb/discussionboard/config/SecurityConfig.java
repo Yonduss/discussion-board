@@ -52,8 +52,8 @@ public class SecurityConfig {
                         UsernamePasswordAuthenticationFilter.class
                 );
 
-        http.headers(headers
-                -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
+        http.headers(headers ->
+                headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));
 
         return http.build();
     }
