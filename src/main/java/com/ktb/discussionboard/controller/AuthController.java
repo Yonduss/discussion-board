@@ -44,7 +44,7 @@ public class AuthController {
 
     @PostMapping("/auth/reissue")
     public ResponseEntity<ApiResponse<TokenReissueResponseDto>> reissue(
-            @RequestBody TokenReissueRequestDto request) {
+            @Valid @RequestBody TokenReissueRequestDto request) {
         TokenReissueResponseDto result = authService.reissue(request);
 
         return ResponseEntity.ok(

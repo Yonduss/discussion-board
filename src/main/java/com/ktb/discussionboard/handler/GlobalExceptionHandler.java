@@ -5,6 +5,7 @@ import com.ktb.discussionboard.exception.ErrorCode;
 import com.ktb.discussionboard.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -32,6 +33,26 @@ public class GlobalExceptionHandler {
                 .getFieldErrors()
                 .forEach(error ->
                         errors.put(error.getField(), error.getDefaultMessage()));
+
+        return ResponseEntity
+                .status(errorCode.getStatus())
+                .body(ApiResponse.of(errorCode.getCode(), errors));
+    }
+
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity<ApiResponse<Map<String, String>>> handleMethodValidationException(
+            HandlerMethodValidationException e) {
+        Map<String, String> errors = new HashMap<>();
+        ErrorCode errorCode = ErrorCode.VALIDATION_FAILED;
+
+        e.getParameterValidationResults().forEach(result ->
+                result.getResolvableErrors().forEach(error ->
+                        errors.put(
+                                result.getMethodParameter().getParameterName(),
+                                error.getDefaultMessage()
+                        )
+                )
+        );
 
         return ResponseEntity
                 .status(errorCode.getStatus())

@@ -4,6 +4,9 @@ import com.ktb.discussionboard.dto.*;
 import com.ktb.discussionboard.response.ApiResponse;
 import com.ktb.discussionboard.service.PostService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,12 +50,13 @@ public class PostController {
     @GetMapping
     public ResponseEntity<ApiResponse<PostPageResponseDto>> getPosts(
             Authentication authentication,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "10") @Min(1) @Max(50) int size,
+            @RequestParam(required = false) @Size(max = 100) String keyword) {
 
         String email = authentication.getName();
 
-        PostPageResponseDto response = postService.getPosts(email, page, size);
+        PostPageResponseDto response = postService.getPosts(email, page, size, keyword);
 
         return ResponseEntity.ok(
                 ApiResponse.of("Posts found successfully", response));
@@ -62,7 +66,7 @@ public class PostController {
     public ResponseEntity<ApiResponse<PostResponseDto>> updatePost(
             Authentication authentication,
             @PathVariable Long postId,
-            @RequestBody UpdatePostRequestDto request) {
+            @Valid @RequestBody UpdatePostRequestDto request) {
 
         String email = authentication.getName();
 
@@ -73,29 +77,31 @@ public class PostController {
     }
 
     @PostMapping("/{postId}/likes")
-    public ResponseEntity<ApiResponse<Void>> likePost(
+    public ResponseEntity<ApiResponse<PostLikeResponseDto>> likePost(
             Authentication authentication,
             @PathVariable Long postId) {
 
         String email = authentication.getName();
 
-        postService.likePost(email, postId);
+        PostLikeResponseDto result = postService.likePost(email, postId);
 
         return ResponseEntity.ok(
-                ApiResponse.of("Post liked successfully", null));
+                ApiResponse.of("Post liked successfully", result)
+        );
     }
 
     @DeleteMapping("/{postId}/likes")
-    public ResponseEntity<ApiResponse<Void>> unlikePost(
+    public ResponseEntity<ApiResponse<PostLikeResponseDto>> unlikePost(
             Authentication authentication,
             @PathVariable Long postId) {
 
         String email = authentication.getName();
 
-        postService.unlikePost(email, postId);
+        PostLikeResponseDto result = postService.unlikePost(email, postId);
 
         return ResponseEntity.ok(
-                ApiResponse.of("Post unliked successfully", null));
+                ApiResponse.of("Post unliked successfully", result)
+        );
     }
 
     @PostMapping("/{postId}/reports")

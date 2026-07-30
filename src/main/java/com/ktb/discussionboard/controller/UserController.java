@@ -33,7 +33,7 @@ public class UserController {
     @PatchMapping
     public ResponseEntity<ApiResponse<UserResponseDto>> updateUserProfile(
             Authentication authentication,
-            @RequestBody UpdateUserProfileRequestDto request) {
+            @Valid @RequestBody UpdateUserProfileRequestDto request) {
 
         String email = authentication.getName();
 
