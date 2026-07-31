@@ -34,7 +34,7 @@ INSERT INTO users (
      'dummy@dummy.com',
      '$2a$10$XW3uqYz62k1H5ux6n5bdk.317aawij1WtgcZy1b4zxpTYjyx7UZk.', --87654321
      'dummy',
-     'https://i.namu.wiki/i/Jy-CzUrta6Ok4O-gEx3a8VaeybluRWDNl8KiovmnU_YwQIaylqa9yXdbCR67dsvLRtJjtGsTCaDWwcdOAMcf6w.svg',
+     '/src/images/TEX_logo.svg',
      false,
      CURRENT_TIMESTAMP,
      CURRENT_TIMESTAMP,
@@ -78,7 +78,7 @@ INSERT INTO users (
     'hoo@hoo.com',
     '$2a$10$Ipk7Xms7kvXN/TgqqO0b7OJNHhbmCrRBSheHDd7CQGC2HlnrzdWJ.', --12345678
     'hoo',
-    'https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:67:current.png/w_426,q_auto:best/v1/people/808982/headshot/67/current',
+    '/src/images/SF_logo.svg',
     false,
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP,
