@@ -85,12 +85,23 @@ class PostServiceTest {
         given(postRepository.findAllByDeletedFalseAndHiddenFalseOrderByCreatedAtDesc(pageable))
                 .willReturn(new PageImpl<>(List.of(firstPost, secondPost), pageable, 2));
 
-        PostImageProjection firstImage = imageProjection(1L, "first-1.jpg");
-        PostImageProjection secondImage = imageProjection(1L, "first-2.jpg");
+        PostImageProjection firstImage = mock(PostImageProjection.class);
+        given(firstImage.getPostId()).willReturn(1L);
+        given(firstImage.getImageUrl()).willReturn("first-1.jpg");
+
+        PostImageProjection secondImage = mock(PostImageProjection.class);
+        given(secondImage.getPostId()).willReturn(1L);
+        given(secondImage.getImageUrl()).willReturn("first-2.jpg");
+
         given(postImageRepository.findAllProjectedByPostIds(List.of(1L, 2L)))
                 .willReturn(List.of(firstImage, secondImage));
 
-        PostCommentCountProjection firstCommentCount = commentCountProjection(1L, 3L);
+        PostCommentCountProjection firstCommentCount = mock(
+                PostCommentCountProjection.class
+        );
+        given(firstCommentCount.getPostId()).willReturn(1L);
+        given(firstCommentCount.getCommentCount()).willReturn(3L);
+
         given(commentRepository.countActiveCommentsByPostIds(List.of(1L, 2L)))
                 .willReturn(List.of(firstCommentCount));
 
@@ -103,7 +114,7 @@ class PostServiceTest {
         // then
         assertThat(result.getPosts()).hasSize(2);
 
-        PostResponseDto firstResult = result.getPosts().get(0);
+        PostResponseDto firstResult = result.getPosts().getFirst();
         assertThat(firstResult.getPostImageUrls())
                 .containsExactly("first-1.jpg", "first-2.jpg");
         assertThat(firstResult.getCommentCount()).isEqualTo(3);
@@ -182,20 +193,4 @@ class PostServiceTest {
         );
     }
 
-    private PostImageProjection imageProjection(Long postId, String imageUrl) {
-        PostImageProjection projection = mock(PostImageProjection.class);
-        given(projection.getPostId()).willReturn(postId);
-        given(projection.getImageUrl()).willReturn(imageUrl);
-        return projection;
-    }
-
-    private PostCommentCountProjection commentCountProjection(
-            Long postId,
-            long commentCount
-    ) {
-        PostCommentCountProjection projection = mock(PostCommentCountProjection.class);
-        given(projection.getPostId()).willReturn(postId);
-        given(projection.getCommentCount()).willReturn(commentCount);
-        return projection;
-    }
 }
