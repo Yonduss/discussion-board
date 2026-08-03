@@ -1,8 +1,10 @@
 package com.ktb.discussionboard.service;
 
 import com.ktb.discussionboard.domain.Post;
+import com.ktb.discussionboard.domain.PostLike;
 import com.ktb.discussionboard.domain.User;
 import com.ktb.discussionboard.dto.PostPageResponseDto;
+import com.ktb.discussionboard.dto.PostLikeResponseDto;
 import com.ktb.discussionboard.dto.PostResponseDto;
 import com.ktb.discussionboard.repository.CommentRepository;
 import com.ktb.discussionboard.repository.PostImageRepository;
@@ -188,6 +190,64 @@ class PostServiceTest {
         assertThat(result.getPosts()).isEmpty();
         then(postRepository).should()
                 .searchPosts("100!%!_match!!", pageable);
+    }
+
+    @Test
+    @DisplayName("Like post returns the persisted like count")
+    void likePost_returnsCountFromLikeRepository() {
+        // given
+        String email = "viewer@test.com";
+        Long postId = 1L;
+        User currentUser = createUser(99L, email, "viewer");
+        User author = createUser(10L, "author@test.com", "author");
+        Post post = createPost(postId, author, "Post", 0);
+
+        given(userRepository.findByEmailAndDeletedFalse(email))
+                .willReturn(Optional.of(currentUser));
+        given(postRepository.findByIdAndDeletedFalseAndHiddenFalse(postId))
+                .willReturn(Optional.of(post));
+        given(postLikeRepository.existsByUser_IdAndPost_Id(99L, postId))
+                .willReturn(false);
+        given(postLikeRepository.countByPost_Id(postId)).willReturn(2L);
+
+        // when
+        PostLikeResponseDto result = postService.likePost(email, postId);
+
+        // then
+        assertThat(result.getLikeCount()).isEqualTo(2);
+        assertThat(result.isLiked()).isTrue();
+        then(postRepository).should().increaseLikeCount(postId);
+        then(postLikeRepository).should().countByPost_Id(postId);
+    }
+
+    @Test
+    @DisplayName("Unlike post returns the persisted like count")
+    void unlikePost_returnsCountFromLikeRepository() {
+        // given
+        String email = "viewer@test.com";
+        Long postId = 1L;
+        User currentUser = createUser(99L, email, "viewer");
+        User author = createUser(10L, "author@test.com", "author");
+        Post post = createPost(postId, author, "Post", 10);
+        PostLike postLike = new PostLike();
+
+        given(userRepository.findByEmailAndDeletedFalse(email))
+                .willReturn(Optional.of(currentUser));
+        given(postRepository.findByIdAndDeletedFalseAndHiddenFalse(postId))
+                .willReturn(Optional.of(post));
+        given(postLikeRepository.findByUser_IdAndPost_Id(99L, postId))
+                .willReturn(Optional.of(postLike));
+        given(postLikeRepository.countByPost_Id(postId)).willReturn(4L);
+
+        // when
+        PostLikeResponseDto result = postService.unlikePost(email, postId);
+
+        // then
+        assertThat(result.getLikeCount()).isEqualTo(4);
+        assertThat(result.isLiked()).isFalse();
+        then(postLikeRepository).should().delete(postLike);
+        then(postRepository).should().decreaseLikeCount(postId);
+        then(postLikeRepository).should().countByPost_Id(postId);
     }
 
     private User createUser(Long id, String email, String nickname) {

@@ -195,10 +195,11 @@ public class PostService {
                         LocalDateTime.now());
 
         postLikeRepository.save(postLike);
-
-        int updatedLikeCount = post.getLikeCount() + 1;
-
         postRepository.increaseLikeCount(postId);
+
+        int updatedLikeCount = Math.toIntExact(
+                postLikeRepository.countByPost_Id(postId)
+        );
 
         return new PostLikeResponseDto(
                 updatedLikeCount,
@@ -218,10 +219,11 @@ public class PostService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_LIKED));
 
         postLikeRepository.delete(postLike);
-
-        int updatedLikeCount = Math.max(post.getLikeCount() - 1, 0);
-
         postRepository.decreaseLikeCount(postId);
+
+        int updatedLikeCount = Math.toIntExact(
+                postLikeRepository.countByPost_Id(postId)
+        );
 
         return new PostLikeResponseDto(
                 updatedLikeCount,
