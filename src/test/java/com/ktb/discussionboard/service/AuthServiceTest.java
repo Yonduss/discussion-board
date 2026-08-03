@@ -264,6 +264,43 @@ class AuthServiceTest {
     }
 
     @Test
+    @DisplayName("Logout deletes the stored refresh token")
+    void logout_success() {
+        // given
+        String email = "test@test.com";
+        User user = new User();
+        user.setId(1L);
+        user.setEmail(email);
+
+        given(userRepository.findByEmailAndDeletedFalse(email))
+                .willReturn(Optional.of(user));
+
+        // when
+        authService.logout(email);
+
+        // then
+        then(refreshTokenRepository).should().deleteByUser_Id(1L);
+    }
+
+    @Test
+    @DisplayName("Logout fails when the user does not exist")
+    void logout_userNotFound() {
+        // given
+        String email = "missing@test.com";
+        given(userRepository.findByEmailAndDeletedFalse(email))
+                .willReturn(Optional.empty());
+
+        // when & then
+        BusinessException exception = assertThrows(
+                BusinessException.class,
+                () -> authService.logout(email)
+        );
+
+        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_FOUND);
+        then(refreshTokenRepository).shouldHaveNoInteractions();
+    }
+
+    @Test
     @DisplayName("Reissue token success")
     void reissue_success() {
         // given

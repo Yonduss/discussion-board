@@ -107,6 +107,14 @@ public class AuthService {
     }
 
     @Transactional
+    public void logout(String email) {
+        User user = userRepository.findByEmailAndDeletedFalse(email)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        refreshTokenRepository.deleteByUser_Id(user.getId());
+    }
+
+    @Transactional
     public TokenReissueResponseDto reissue(TokenReissueRequestDto request) {
         String refreshTokenValue = request.getRefreshToken();
 

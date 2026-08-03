@@ -152,6 +152,7 @@ class UserServiceTest {
         String email = "test@test.com";
 
         User user = new User();
+        user.setId(1L);
         user.setEmail(email);
         user.setPassword("encodedOldPassword");
 
@@ -173,6 +174,7 @@ class UserServiceTest {
         // then
         assertThat(user.getPassword()).isEqualTo("encodedNewPassword");
         assertThat(user.getPasswordUpdatedAt()).isNotNull();
+        then(refreshTokenRepository).should().deleteByUser_Id(1L);
     }
 
     @Test

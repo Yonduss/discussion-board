@@ -73,6 +73,8 @@ public class UserService {
 
         user.setPassword(encodedNewPassword);
         user.setPasswordUpdatedAt(LocalDateTime.now());
+
+        refreshTokenRepository.deleteByUser_Id(user.getId());
     }
 
     @Transactional
