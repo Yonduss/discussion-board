@@ -284,7 +284,7 @@ class AuthServiceTest {
 
         given(refreshTokenRepository.findByToken("old-refresh-token")).willReturn(Optional.of(savedRefreshToken));
 
-        given(jwtTokenProvider.validateToken("old-refresh-token")).willReturn(true);
+        given(jwtTokenProvider.validateRefreshToken("old-refresh-token")).willReturn(true);
         given(jwtTokenProvider.getEmailFromToken("old-refresh-token")).willReturn("test@test.com");
         given(jwtTokenProvider.generateAccessToken("test@test.com")).willReturn("new-access-token");
         given(jwtTokenProvider.generateRefreshToken("test@test.com")).willReturn("new-refresh-token");
@@ -306,7 +306,7 @@ class AuthServiceTest {
         TokenReissueRequestDto request = org.mockito.Mockito.mock(TokenReissueRequestDto.class);
         given(request.getRefreshToken()).willReturn("invalid-refresh-token");
 
-        given(jwtTokenProvider.validateToken("invalid-refresh-token")).willReturn(false);
+        given(jwtTokenProvider.validateRefreshToken("invalid-refresh-token")).willReturn(false);
 
         // when & then
         BusinessException exception =

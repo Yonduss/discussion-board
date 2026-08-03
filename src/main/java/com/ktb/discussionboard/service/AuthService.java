@@ -110,7 +110,7 @@ public class AuthService {
     public TokenReissueResponseDto reissue(TokenReissueRequestDto request) {
         String refreshTokenValue = request.getRefreshToken();
 
-        if (!jwtTokenProvider.validateToken(refreshTokenValue)) {
+        if (!jwtTokenProvider.validateRefreshToken(refreshTokenValue)) {
             throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
 

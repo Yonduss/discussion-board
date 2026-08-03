@@ -17,6 +17,10 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider {
 
+    private static final String TOKEN_TYPE_CLAIM = "type";
+    private static final String ACCESS_TOKEN_TYPE = "access";
+    private static final String REFRESH_TOKEN_TYPE = "refresh";
+
     private final SecretKey secretKey;
     private final long accessTokenExpiration;
     private final long refreshTokenExpiration;
@@ -34,37 +38,44 @@ public class JwtTokenProvider {
     }
 
     public String generateAccessToken(String email) {
-        Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + accessTokenExpiration);
-
-        return Jwts.builder()
-                .subject(email)
-                .issuedAt(now)
-                .expiration(expiryDate)
-                .signWith(secretKey)
-                .compact();
+        return generateToken(email, ACCESS_TOKEN_TYPE, accessTokenExpiration);
     }
 
     public String generateRefreshToken(String email) {
+        return generateToken(email, REFRESH_TOKEN_TYPE, refreshTokenExpiration);
+    }
+
+    public boolean validateAccessToken(String token) {
+        return validateTokenType(token, ACCESS_TOKEN_TYPE);
+    }
+
+    public boolean validateRefreshToken(String token) {
+        return validateTokenType(token, REFRESH_TOKEN_TYPE);
+    }
+
+    private String generateToken(String email, String tokenType, long expiration) {
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + refreshTokenExpiration);
+        Date expiryDate = new Date(now.getTime() + expiration);
 
         return Jwts.builder()
                 .subject(email)
+                .claim(TOKEN_TYPE_CLAIM, tokenType)
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(secretKey)
                 .compact();
     }
 
-    public boolean validateToken(String token) {
+    private boolean validateTokenType(String token, String expectedType) {
         try {
-            Jwts.parser()
+            String tokenType = Jwts.parser()
                     .verifyWith(secretKey)
                     .build()
-                    .parseSignedClaims(token);
+                    .parseSignedClaims(token)
+                    .getPayload()
+                    .get(TOKEN_TYPE_CLAIM, String.class);
 
-            return true;
+            return expectedType.equals(tokenType);
         } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
