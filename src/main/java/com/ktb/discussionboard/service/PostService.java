@@ -5,6 +5,8 @@ import com.ktb.discussionboard.dto.*;
 import com.ktb.discussionboard.exception.BusinessException;
 import com.ktb.discussionboard.exception.ErrorCode;
 import com.ktb.discussionboard.repository.*;
+import com.ktb.discussionboard.repository.projection.PostCommentCountProjection;
+import com.ktb.discussionboard.repository.projection.PostImageProjection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +16,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -93,10 +98,8 @@ public class PostService {
             postPage = postRepository.searchPosts(keyword.trim(), pageable);
         }
 
-        List<PostResponseDto> posts = postPage.getContent()
-                        .stream()
-                        .map(post -> toPostResponseDto(post, currentUser))
-                        .toList();
+        List<Post> pagePosts = postPage.getContent();
+        List<PostResponseDto> posts = toPostResponseDtos(pagePosts, currentUser);
 
         return new PostPageResponseDto(
                 postPage.getNumber(),
@@ -262,11 +265,64 @@ public class PostService {
                         .map(PostImage::getImageUrl)
                         .toList();
 
-        User user = post.getUser();
-
         int commentCount = commentRepository.countByPost_IdAndDeletedFalse(post.getId());
 
         boolean liked = postLikeRepository.existsByUser_IdAndPost_Id(currentUser.getId(), post.getId());
+
+        return toPostResponseDto(post, postImageUrls, commentCount, liked);
+    }
+
+    private List<PostResponseDto> toPostResponseDtos(
+            List<Post> posts, User currentUser) {
+        if (posts.isEmpty()) {
+            return List.of();
+        }
+
+        List<Long> postIds = posts.stream()
+                .map(Post::getId)
+                .toList();
+
+        Map<Long, List<String>> imageUrlsByPostId = postImageRepository
+                .findAllProjectedByPostIds(postIds)
+                .stream()
+                .collect(Collectors.groupingBy(
+                        PostImageProjection::getPostId,
+                        Collectors.mapping(
+                                PostImageProjection::getImageUrl,
+                                Collectors.toList()
+                        )
+                ));
+
+        Map<Long, Integer> commentCountsByPostId = commentRepository
+                .countActiveCommentsByPostIds(postIds)
+                .stream()
+                .collect(Collectors.toMap(
+                        PostCommentCountProjection::getPostId,
+                        count -> Math.toIntExact(count.getCommentCount())
+                ));
+
+        Set<Long> likedPostIds = postLikeRepository.findLikedPostIds(
+                currentUser.getId(),
+                postIds
+        );
+
+        return posts.stream()
+                .map(post -> toPostResponseDto(
+                        post,
+                        imageUrlsByPostId.getOrDefault(post.getId(), List.of()),
+                        commentCountsByPostId.getOrDefault(post.getId(), 0),
+                        likedPostIds.contains(post.getId())
+                ))
+                .toList();
+    }
+
+    private PostResponseDto toPostResponseDto(
+            Post post,
+            List<String> postImageUrls,
+            int commentCount,
+            boolean liked
+    ) {
+        User user = post.getUser();
 
         return new PostResponseDto(
                 post.getId(),
