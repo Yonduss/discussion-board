@@ -48,8 +48,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     where p.deleted = false
       and p.hidden = false
       and (
-          lower(p.title) like lower(concat('%', :keyword, '%'))
-          or lower(p.content) like lower(concat('%', :keyword, '%'))
+          lower(p.title) like lower(concat('%', :keyword, '%')) escape '!'
+          or lower(p.content) like lower(concat('%', :keyword, '%')) escape '!'
       )
     order by p.createdAt desc
     """)

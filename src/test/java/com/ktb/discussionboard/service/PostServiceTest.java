@@ -163,6 +163,33 @@ class PostServiceTest {
         then(postLikeRepository).shouldHaveNoInteractions();
     }
 
+    @Test
+    @DisplayName("Search posts escapes LIKE wildcard characters")
+    void getPosts_withLikeWildcards_escapesSearchKeyword() {
+        // given
+        String email = "viewer@test.com";
+        User currentUser = createUser(99L, email, "viewer");
+        PageRequest pageable = PageRequest.of(0, 10);
+
+        given(userRepository.findByEmailAndDeletedFalse(email))
+                .willReturn(Optional.of(currentUser));
+        given(postRepository.searchPosts("100!%!_match!!", pageable))
+                .willReturn(new PageImpl<>(List.of(), pageable, 0));
+
+        // when
+        PostPageResponseDto result = postService.getPosts(
+                email,
+                0,
+                10,
+                " 100%_match! "
+        );
+
+        // then
+        assertThat(result.getPosts()).isEmpty();
+        then(postRepository).should()
+                .searchPosts("100!%!_match!!", pageable);
+    }
+
     private User createUser(Long id, String email, String nickname) {
         User user = new User();
         user.setId(id);

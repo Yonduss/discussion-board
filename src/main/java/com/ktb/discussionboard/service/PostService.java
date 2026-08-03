@@ -95,7 +95,8 @@ public class PostService {
         if (keyword == null || keyword.isBlank()) {
             postPage = postRepository.findAllByDeletedFalseAndHiddenFalseOrderByCreatedAtDesc(pageable);
         } else {
-            postPage = postRepository.searchPosts(keyword.trim(), pageable);
+            String escapedKeyword = escapeLikeWildcards(keyword.trim());
+            postPage = postRepository.searchPosts(escapedKeyword, pageable);
         }
 
         List<Post> pagePosts = postPage.getContent();
@@ -340,5 +341,12 @@ public class PostService {
                 post.getCreatedAt(),
                 post.getUpdatedAt()
         );
+    }
+
+    private String escapeLikeWildcards(String keyword) {
+        return keyword
+                .replace("!", "!!")
+                .replace("%", "!%")
+                .replace("_", "!_");
     }
 }
