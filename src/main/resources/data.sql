@@ -10,7 +10,7 @@ INSERT INTO users (
     deleted_at
 ) VALUES (
     'test@test.com',
-    '$2a$10$Ipk7Xms7kvXN/TgqqO0b7OJNHhbmCrRBSheHDd7CQGC2HlnrzdWJ.', --12345678
+    '$2a$10$Ipk7Xms7kvXN/TgqqO0b7OJNHhbmCrRBSheHDd7CQGC2HlnrzdWJ.', -- 12345678
     'test',
     'https://i.namu.wiki/i/O88iZiOsgmeag6nqOlfUC36JpLvV4utcUEwk03sqWOmJG6cut9O9WzychNVyqlSfcUDByx42tM61YyUhITzrnjBmQiqfSluC7R61rLEOv1RJUyE_ATaaNbQu_DgyZV9i58B-P2tEhhldpY1tjK8n0Q.svg',
     false,
@@ -32,9 +32,9 @@ INSERT INTO users (
     deleted_at
 ) VALUES (
      'dummy@dummy.com',
-     '$2a$10$XW3uqYz62k1H5ux6n5bdk.317aawij1WtgcZy1b4zxpTYjyx7UZk.', --87654321
+     '$2a$10$XW3uqYz62k1H5ux6n5bdk.317aawij1WtgcZy1b4zxpTYjyx7UZk.', -- 87654321
      'dummy',
-     '/src/images/TEX_logo.svg',
+     'https://i.namu.wiki/i/5QdXnLuPkrMU9u2uNm_w0QQtwI4x-IfrThJKM6NTAcx5PNyFy8dFvsyp4BMTIf-GKYdwNwC1PoRYzIU8Yn3vJA.svg',
      false,
      CURRENT_TIMESTAMP,
      CURRENT_TIMESTAMP,
@@ -54,7 +54,7 @@ INSERT INTO users (
     deleted_at
 ) VALUES (
     'jimothy@jimothy.com',
-    '$2a$10$XW3uqYz62k1H5ux6n5bdk.317aawij1WtgcZy1b4zxpTYjyx7UZk.', --87654321
+    '$2a$10$XW3uqYz62k1H5ux6n5bdk.317aawij1WtgcZy1b4zxpTYjyx7UZk.', -- 87654321
     'jimothy',
     'https://www.dndbeyond.com/avatars/thumbnails/57907/11/1000/1000/639202523315904128.png',
     false,
@@ -76,9 +76,9 @@ INSERT INTO users (
     deleted_at
 ) VALUES (
     'hoo@hoo.com',
-    '$2a$10$Ipk7Xms7kvXN/TgqqO0b7OJNHhbmCrRBSheHDd7CQGC2HlnrzdWJ.', --12345678
+    '$2a$10$Ipk7Xms7kvXN/TgqqO0b7OJNHhbmCrRBSheHDd7CQGC2HlnrzdWJ.', -- 12345678
     'hoo',
-    '/src/images/SF_logo.svg',
+    'https://midfield.mlbstatic.com/v1/people/808982/spots/240?zoom=1.2',
     false,
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP,
