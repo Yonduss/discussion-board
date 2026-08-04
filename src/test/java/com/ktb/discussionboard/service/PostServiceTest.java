@@ -1,5 +1,6 @@
 package com.ktb.discussionboard.service;
 
+import com.ktb.discussionboard.domain.MlbTeam;
 import com.ktb.discussionboard.domain.Post;
 import com.ktb.discussionboard.domain.PostLike;
 import com.ktb.discussionboard.domain.User;
@@ -77,6 +78,7 @@ class PostServiceTest {
         User currentUser = createUser(99L, email, "viewer");
         User firstAuthor = createUser(10L, "first@test.com", "first");
         User secondAuthor = createUser(20L, "second@test.com", "second");
+        firstAuthor.updateFavoriteTeam(MlbTeam.TEX, true);
 
         Post firstPost = createPost(1L, firstAuthor, "First post", 2);
         Post secondPost = createPost(2L, secondAuthor, "Second post", 5);
@@ -117,6 +119,8 @@ class PostServiceTest {
         assertThat(result.getPosts()).hasSize(2);
 
         PostResponseDto firstResult = result.getPosts().getFirst();
+        assertThat(firstResult.getProfileImageUrl())
+                .isEqualTo("/team-logos/TEX_logo.svg");
         assertThat(firstResult.getPostImageUrls())
                 .containsExactly("first-1.jpg", "first-2.jpg");
         assertThat(firstResult.getCommentCount()).isEqualTo(3);

@@ -1,7 +1,10 @@
 package com.ktb.discussionboard.service;
 
+import com.ktb.discussionboard.domain.MlbTeam;
+import com.ktb.discussionboard.domain.ProfileImageSource;
 import com.ktb.discussionboard.domain.User;
 import com.ktb.discussionboard.dto.ChangePasswordRequestDto;
+import com.ktb.discussionboard.dto.UpdateFavoriteTeamRequestDto;
 import com.ktb.discussionboard.dto.UpdateUserProfileRequestDto;
 import com.ktb.discussionboard.dto.UserResponseDto;
 import com.ktb.discussionboard.exception.BusinessException;
@@ -71,6 +74,8 @@ class UserServiceTest {
         assertThat(result.getEmail()).isEqualTo(user.getEmail());
         assertThat(result.getNickname()).isEqualTo(user.getNickname());
         assertThat(result.getProfileImageUrl()).isEqualTo(user.getProfileImageUrl());
+        assertThat(result.getPersonalProfileImageUrl()).isEqualTo(user.getProfileImageUrl());
+        assertThat(result.getProfileImageSource()).isEqualTo(ProfileImageSource.PERSONAL);
     }
 
     @Test
@@ -143,6 +148,68 @@ class UserServiceTest {
                         () -> userService.updateUserProfile(email, request));
 
         assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.NICKNAME_EXISTS);
+    }
+
+    @Test
+    @DisplayName("Update favorite team and use its logo without replacing personal image")
+    void updateFavoriteTeam_useTeamLogo_success() {
+        // given
+        String email = "test@test.com";
+        User user = new User();
+        user.setEmail(email);
+        user.setProfileImageUrl("personal-image.jpg");
+
+        UpdateFavoriteTeamRequestDto request = Mockito.mock(
+                UpdateFavoriteTeamRequestDto.class
+        );
+        given(request.getFavoriteTeam()).willReturn(MlbTeam.TEX);
+        given(request.getUseTeamLogoAsProfileImage()).willReturn(true);
+        given(userRepository.findByEmailAndDeletedFalse(email))
+                .willReturn(Optional.of(user));
+
+        // when
+        UserResponseDto result = userService.updateFavoriteTeam(email, request);
+
+        // then
+        assertThat(user.getFavoriteTeam()).isEqualTo(MlbTeam.TEX);
+        assertThat(user.getProfileImageSource())
+                .isEqualTo(ProfileImageSource.FAVORITE_TEAM);
+        assertThat(user.getProfileImageUrl()).isEqualTo("personal-image.jpg");
+        assertThat(result.getProfileImageUrl())
+                .isEqualTo("/team-logos/TEX_logo.svg");
+        assertThat(result.getPersonalProfileImageUrl())
+                .isEqualTo("personal-image.jpg");
+        assertThat(result.getFavoriteTeam()).isEqualTo(MlbTeam.TEX);
+    }
+
+    @Test
+    @DisplayName("Update favorite team and keep using the personal image")
+    void updateFavoriteTeam_keepPersonalImage_success() {
+        // given
+        String email = "test@test.com";
+        User user = new User();
+        user.setEmail(email);
+        user.setProfileImageUrl("personal-image.jpg");
+        user.updateFavoriteTeam(MlbTeam.LAD, true);
+
+        UpdateFavoriteTeamRequestDto request = Mockito.mock(
+                UpdateFavoriteTeamRequestDto.class
+        );
+        given(request.getFavoriteTeam()).willReturn(MlbTeam.SF);
+        given(request.getUseTeamLogoAsProfileImage()).willReturn(false);
+        given(userRepository.findByEmailAndDeletedFalse(email))
+                .willReturn(Optional.of(user));
+
+        // when
+        UserResponseDto result = userService.updateFavoriteTeam(email, request);
+
+        // then
+        assertThat(user.getFavoriteTeam()).isEqualTo(MlbTeam.SF);
+        assertThat(user.getProfileImageSource())
+                .isEqualTo(ProfileImageSource.PERSONAL);
+        assertThat(result.getProfileImageUrl()).isEqualTo("personal-image.jpg");
+        assertThat(result.getPersonalProfileImageUrl())
+                .isEqualTo("personal-image.jpg");
     }
 
     @Test

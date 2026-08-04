@@ -1,6 +1,7 @@
 package com.ktb.discussionboard.service;
 
 import com.ktb.discussionboard.domain.RefreshToken;
+import com.ktb.discussionboard.domain.ProfileImageSource;
 import com.ktb.discussionboard.domain.User;
 import com.ktb.discussionboard.dto.*;
 import com.ktb.discussionboard.exception.BusinessException;
@@ -49,6 +50,8 @@ public class AuthService {
                 encodedPassword,
                 request.getNickname(),
                 request.getProfileImageUrl(),
+                null,
+                ProfileImageSource.PERSONAL,
                 false,
                 now(),
                 now(),

@@ -331,7 +331,7 @@ public class PostService {
                 post.getId(),
                 user.getId(),
                 user.getNickname(),
-                user.getProfileImageUrl(),
+                user.resolveDisplayProfileImageUrl(),
                 post.getTitle(),
                 post.getContent(),
                 postImageUrls,

@@ -32,6 +32,19 @@ public class User {
     @Column(name = "profile_image_url")
     private String profileImageUrl;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "favorite_team", length = 3)
+    private MlbTeam favoriteTeam;
+
+    @Enumerated(EnumType.STRING)
+    @Column(
+            name = "profile_image_source",
+            nullable = false,
+            length = 20,
+            columnDefinition = "varchar(20) default 'PERSONAL'"
+    )
+    private ProfileImageSource profileImageSource = ProfileImageSource.PERSONAL;
+
     @Column(nullable = false)
     private boolean deleted;
 
@@ -46,4 +59,23 @@ public class User {
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
+
+    public void updateFavoriteTeam(
+            MlbTeam favoriteTeam,
+            boolean useTeamLogoAsProfileImage
+    ) {
+        this.favoriteTeam = favoriteTeam;
+        this.profileImageSource = useTeamLogoAsProfileImage
+                ? ProfileImageSource.FAVORITE_TEAM
+                : ProfileImageSource.PERSONAL;
+    }
+
+    public String resolveDisplayProfileImageUrl() {
+        if (profileImageSource == ProfileImageSource.FAVORITE_TEAM
+                && favoriteTeam != null) {
+            return favoriteTeam.getLogoPath();
+        }
+
+        return profileImageUrl;
+    }
 }

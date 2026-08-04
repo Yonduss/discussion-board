@@ -4,6 +4,7 @@ import com.ktb.discussionboard.dto.ChangePasswordRequestDto;
 import com.ktb.discussionboard.dto.MyCommentResponseDto;
 import com.ktb.discussionboard.dto.MyPostResponseDto;
 import com.ktb.discussionboard.dto.PageResponseDto;
+import com.ktb.discussionboard.dto.UpdateFavoriteTeamRequestDto;
 import com.ktb.discussionboard.dto.UpdateUserProfileRequestDto;
 import com.ktb.discussionboard.dto.UserResponseDto;
 import com.ktb.discussionboard.response.ApiResponse;
@@ -82,6 +83,21 @@ public class UserController {
 
         return ResponseEntity.ok(
                 ApiResponse.of("User profile updated successfully", result));
+    }
+
+    @PatchMapping("/me/favorite-team")
+    public ResponseEntity<ApiResponse<UserResponseDto>> updateFavoriteTeam(
+            Authentication authentication,
+            @Valid @RequestBody UpdateFavoriteTeamRequestDto request) {
+
+        UserResponseDto result = userService.updateFavoriteTeam(
+                authentication.getName(),
+                request
+        );
+
+        return ResponseEntity.ok(
+                ApiResponse.of("Favorite team updated successfully", result)
+        );
     }
 
     @PatchMapping("/password")

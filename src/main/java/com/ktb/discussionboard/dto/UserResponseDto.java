@@ -1,5 +1,7 @@
 package com.ktb.discussionboard.dto;
 
+import com.ktb.discussionboard.domain.MlbTeam;
+import com.ktb.discussionboard.domain.ProfileImageSource;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -10,4 +12,7 @@ public class UserResponseDto {
     private String email;
     private String nickname;
     private String profileImageUrl;
+    private String personalProfileImageUrl;
+    private MlbTeam favoriteTeam;
+    private ProfileImageSource profileImageSource;
 }

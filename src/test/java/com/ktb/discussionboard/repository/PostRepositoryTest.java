@@ -1,6 +1,7 @@
 package com.ktb.discussionboard.repository;
 
 import com.ktb.discussionboard.domain.Post;
+import com.ktb.discussionboard.domain.ProfileImageSource;
 import com.ktb.discussionboard.domain.User;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
@@ -67,6 +68,8 @@ class PostRepositoryTest {
                 "password",
                 "author",
                 null,
+                null,
+                ProfileImageSource.PERSONAL,
                 false,
                 now,
                 now,

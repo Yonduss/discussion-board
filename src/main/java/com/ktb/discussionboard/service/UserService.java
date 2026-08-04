@@ -1,7 +1,9 @@
 package com.ktb.discussionboard.service;
 
+import com.ktb.discussionboard.domain.ProfileImageSource;
 import com.ktb.discussionboard.domain.User;
 import com.ktb.discussionboard.dto.ChangePasswordRequestDto;
+import com.ktb.discussionboard.dto.UpdateFavoriteTeamRequestDto;
 import com.ktb.discussionboard.dto.UpdateUserProfileRequestDto;
 import com.ktb.discussionboard.dto.UserResponseDto;
 import com.ktb.discussionboard.exception.BusinessException;
@@ -53,6 +55,23 @@ public class UserService {
     }
 
     @Transactional
+    public UserResponseDto updateFavoriteTeam(
+            String email,
+            UpdateFavoriteTeamRequestDto request
+    ) {
+        User user = userRepository.findByEmailAndDeletedFalse(email)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        user.updateFavoriteTeam(
+                request.getFavoriteTeam(),
+                Boolean.TRUE.equals(request.getUseTeamLogoAsProfileImage())
+        );
+        user.setProfileUpdatedAt(LocalDateTime.now());
+
+        return toUserResponseDto(user);
+    }
+
+    @Transactional
     public void changePassword(String email, ChangePasswordRequestDto request) {
         User user = userRepository.findByEmailAndDeletedFalse(email)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
@@ -88,6 +107,8 @@ public class UserService {
         user.setEmail("deleted-user-" + user.getId() + "@deleted.email");
         user.setNickname("Unknown user " + user.getId());
         user.setProfileImageUrl(null);
+        user.setFavoriteTeam(null);
+        user.setProfileImageSource(ProfileImageSource.PERSONAL);
         user.setDeletedAt(LocalDateTime.now());
     }
 
@@ -96,7 +117,10 @@ public class UserService {
                 user.getId(),
                 user.getEmail(),
                 user.getNickname(),
-                user.getProfileImageUrl()
+                user.resolveDisplayProfileImageUrl(),
+                user.getProfileImageUrl(),
+                user.getFavoriteTeam(),
+                user.getProfileImageSource()
         );
     }
 }
