@@ -213,6 +213,35 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("Clear favorite team and fall back to the personal image")
+    void updateFavoriteTeam_clearSelection_success() {
+        // given
+        String email = "test@test.com";
+        User user = new User();
+        user.setEmail(email);
+        user.setProfileImageUrl("personal-image.jpg");
+        user.updateFavoriteTeam(MlbTeam.TEX, true);
+
+        UpdateFavoriteTeamRequestDto request = Mockito.mock(
+                UpdateFavoriteTeamRequestDto.class
+        );
+        given(request.getFavoriteTeam()).willReturn(null);
+        given(request.getUseTeamLogoAsProfileImage()).willReturn(false);
+        given(userRepository.findByEmailAndDeletedFalse(email))
+                .willReturn(Optional.of(user));
+
+        // when
+        UserResponseDto result = userService.updateFavoriteTeam(email, request);
+
+        // then
+        assertThat(user.getFavoriteTeam()).isNull();
+        assertThat(user.getProfileImageSource())
+                .isEqualTo(ProfileImageSource.PERSONAL);
+        assertThat(result.getProfileImageUrl()).isEqualTo("personal-image.jpg");
+        assertThat(result.getFavoriteTeam()).isNull();
+    }
+
+    @Test
     @DisplayName("Change password success")
     void changePassword_withValidInfo_success() {
         // given

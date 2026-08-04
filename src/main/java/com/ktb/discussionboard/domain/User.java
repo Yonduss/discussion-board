@@ -66,6 +66,7 @@ public class User {
     ) {
         this.favoriteTeam = favoriteTeam;
         this.profileImageSource = useTeamLogoAsProfileImage
+                && favoriteTeam != null
                 ? ProfileImageSource.FAVORITE_TEAM
                 : ProfileImageSource.PERSONAL;
     }

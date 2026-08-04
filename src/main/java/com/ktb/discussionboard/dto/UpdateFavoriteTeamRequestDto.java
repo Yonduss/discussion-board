@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UpdateFavoriteTeamRequestDto {
 
-    @NotNull(message = "Favorite team is required")
     private MlbTeam favoriteTeam;
 
     @NotNull(message = "Profile image preference is required")
