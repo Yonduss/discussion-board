@@ -2,6 +2,9 @@ package com.ktb.discussionboard.repository;
 
 import com.ktb.discussionboard.domain.Comment;
 import com.ktb.discussionboard.repository.projection.PostCommentCountProjection;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,6 +19,12 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     Optional<Comment> findByIdAndDeletedFalse(Long id);
 
     List<Comment> findAllByPost_IdOrderByCreatedAtAsc(Long postId);
+
+    @EntityGraph(attributePaths = "post")
+    Page<Comment> findAllByUser_IdAndDeletedFalseAndPost_DeletedFalseAndPost_HiddenFalseOrderByCreatedAtDesc(
+            Long userId,
+            Pageable pageable
+    );
 
     int countByPost_IdAndDeletedFalse(Long postId);
 

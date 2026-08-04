@@ -20,6 +20,11 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @EntityGraph(attributePaths = "user")
     Page<Post> findAllByDeletedFalseAndHiddenFalseOrderByCreatedAtDesc(Pageable pageable);
 
+    Page<Post> findAllByUser_IdAndDeletedFalseAndHiddenFalseOrderByCreatedAtDesc(
+            Long userId,
+            Pageable pageable
+    );
+
     @Modifying
     @Query("""
         update Post p
