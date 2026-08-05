@@ -1,0 +1,77 @@
+name: discussionboard
+
+services:
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-discussionboard}
+      MYSQL_USER: ${MYSQL_USER:-discussionboard}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?MYSQL_PASSWORD is required}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?MYSQL_ROOT_PASSWORD is required}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - mysqladmin ping -h localhost -u root -p"$${MYSQL_ROOT_PASSWORD}" --silent
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  backend:
+    image: ghcr.io/yonduss/discussion-board-backend:${BACKEND_IMAGE_TAG:-latest}
+    restart: unless-stopped
+    init: true
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: ${MYSQL_DATABASE:-discussionboard}
+      DB_USERNAME: ${MYSQL_USER:-discussionboard}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      DB_SSL_MODE: DISABLED
+      DB_ALLOW_PUBLIC_KEY_RETRIEVAL: "true"
+      DB_DDL_AUTO: ${DB_DDL_AUTO:-update}
+      SQL_INIT_MODE: never
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - curl
+        - --fail
+        - --silent
+        - http://localhost:8080/actuator/health
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+    expose:
+      - "8080"
+
+  frontend:
+    image: ghcr.io/yonduss/discussionboard-fe-frontend:${FRONTEND_IMAGE_TAG:-latest}
+    restart: unless-stopped
+    ports:
+      - "${HTTP_PORT:-80}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+        restart: true
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget -q -O /dev/null http://127.0.0.1/ || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  mysql-data:
